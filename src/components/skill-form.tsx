@@ -14,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 
 interface Tag {
@@ -42,20 +41,19 @@ interface SkillFormProps {
 export function SkillForm({ initialData, mode }: SkillFormProps) {
   const router = useRouter();
   const [name, setName] = useState(initialData?.name || "");
-  const [description, setDescription] = useState(
-    initialData?.description || ""
-  );
+  const [description, setDescription] = useState(initialData?.description || "");
   const [content, setContent] = useState(initialData?.content || "");
   const [type, setType] = useState(initialData?.type || "prompt");
-  const [parameters, setParameters] = useState(
-    initialData?.parameters || ""
-  );
+  const [parameters, setParameters] = useState(initialData?.parameters || "");
   const [examples, setExamples] = useState(initialData?.examples || "");
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>(
     initialData?.tags?.map((t) => t.id) || []
   );
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [saving, setSaving] = useState(false);
+  const [showOptional, setShowOptional] = useState(
+    !!(initialData?.parameters || initialData?.examples)
+  );
 
   const tokenEstimate = Math.ceil((content.length + description.length) / 4);
 
@@ -80,9 +78,7 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
     }
 
     if (description.length < 20) {
-      toast.error(
-        "Description should be at least 20 characters for good MCP discoverability"
-      );
+      toast.error("Description should be at least 20 characters for good MCP discoverability");
       return;
     }
 
@@ -99,8 +95,7 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
         tagIds: selectedTagIds,
       };
 
-      const url =
-        mode === "edit" ? `/api/skills/${initialData?.id}` : "/api/skills";
+      const url = mode === "edit" ? `/api/skills/${initialData?.id}` : "/api/skills";
       const method = mode === "edit" ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -129,12 +124,12 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main content */}
-        <div className="space-y-4 lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Skill Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        <div className="space-y-6 lg:col-span-2">
+          <div className="rounded-xl border bg-white">
+            <div className="border-b px-6 py-4">
+              <h3 className="text-sm font-medium">Details</h3>
+            </div>
+            <div className="space-y-5 p-6">
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
                 <Input
@@ -148,20 +143,20 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="description">Description</Label>
-                  <span className="text-xs text-muted-foreground">
-                    {description.length} chars (min 20 for MCP discovery)
+                  <span className="text-xs tabular-nums text-muted-foreground">
+                    {description.length} chars
                   </span>
                 </div>
                 <Textarea
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe what this skill does and when to use it. This is the most important field for MCP discoverability."
+                  placeholder="What this skill does and when to use it. Most important field for MCP discoverability."
                   rows={3}
                 />
                 {description.length > 0 && description.length < 20 && (
                   <p className="text-xs text-destructive">
-                    Description too short for effective MCP discovery
+                    Too short for effective MCP discovery (min 20 chars)
                   </p>
                 )}
               </div>
@@ -169,7 +164,7 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="content">Content</Label>
-                  <span className="text-xs text-muted-foreground">
+                  <span className={`text-xs tabular-nums ${tokenEstimate > 5000 ? "text-destructive" : tokenEstimate > 3000 ? "text-amber-600" : "text-muted-foreground"}`}>
                     ~{tokenEstimate} tokens
                   </span>
                 </div>
@@ -177,59 +172,75 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
                   id="content"
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  placeholder="The full skill content — instructions, prompt template, workflow steps, etc."
-                  rows={15}
+                  placeholder="The full skill content &#8212; instructions, prompt template, workflow steps, etc."
+                  rows={16}
                   className="font-mono text-sm"
                 />
                 {tokenEstimate > 5000 && (
                   <p className="text-xs text-amber-600">
-                    Warning: Content exceeds 5000 tokens. Consider splitting
-                    into smaller skills for better context management.
+                    Exceeds 5000 tokens. Consider splitting into smaller skills.
                   </p>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          {/* Optional fields */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Optional</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="parameters">Parameters (JSON)</Label>
-                <Textarea
-                  id="parameters"
-                  value={parameters}
-                  onChange={(e) => setParameters(e.target.value)}
-                  placeholder='e.g. [{"name": "language", "description": "Target programming language"}]'
-                  rows={3}
-                  className="font-mono text-sm"
-                />
+          {/* Optional fields - collapsible */}
+          <div className="rounded-xl border bg-white">
+            <button
+              type="button"
+              className="flex w-full items-center justify-between px-6 py-4 text-left"
+              onClick={() => setShowOptional(!showOptional)}
+            >
+              <h3 className="text-sm font-medium">Parameters & Examples</h3>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className={`text-muted-foreground transition-transform ${showOptional ? "rotate-180" : ""}`}
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+            {showOptional && (
+              <div className="space-y-5 border-t p-6">
+                <div className="space-y-2">
+                  <Label htmlFor="parameters">Parameters (JSON)</Label>
+                  <Textarea
+                    id="parameters"
+                    value={parameters}
+                    onChange={(e) => setParameters(e.target.value)}
+                    placeholder='[{"name": "language", "description": "Target language"}]'
+                    rows={3}
+                    className="font-mono text-sm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="examples">Usage Examples (JSON)</Label>
+                  <Textarea
+                    id="examples"
+                    value={examples}
+                    onChange={(e) => setExamples(e.target.value)}
+                    placeholder='[{"input": "Build a card", "output": "..."}]'
+                    rows={3}
+                    className="font-mono text-sm"
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="examples">Usage Examples (JSON)</Label>
-                <Textarea
-                  id="examples"
-                  value={examples}
-                  onChange={(e) => setExamples(e.target.value)}
-                  placeholder='e.g. [{"input": "Build a card component", "output": "..."}]'
-                  rows={3}
-                  className="font-mono text-sm"
-                />
-              </div>
-            </CardContent>
-          </Card>
+            )}
+          </div>
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Type</CardTitle>
-            </CardHeader>
-            <CardContent>
+        <div className="space-y-6">
+          <div className="rounded-xl border bg-white">
+            <div className="border-b px-6 py-4">
+              <h3 className="text-sm font-medium">Type</h3>
+            </div>
+            <div className="p-6">
               <Select value={type} onValueChange={(v) => setType(v ?? "prompt")}>
                 <SelectTrigger>
                   <SelectValue />
@@ -242,17 +253,17 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
                   <SelectItem value="config">Config</SelectItem>
                 </SelectContent>
               </Select>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Tags</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="rounded-xl border bg-white">
+            <div className="border-b px-6 py-4">
+              <h3 className="text-sm font-medium">Tags</h3>
+            </div>
+            <div className="p-6">
               {availableTags.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  No tags yet. Create some in the Tags section.
+                  No tags yet. Create some in Tags.
                 </p>
               ) : (
                 <div className="flex flex-wrap gap-2">
@@ -262,10 +273,10 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
                       <Badge
                         key={tag.id}
                         variant={selected ? "default" : "outline"}
-                        className="cursor-pointer"
+                        className="cursor-pointer transition-colors"
                         style={
                           selected
-                            ? { backgroundColor: tag.color, borderColor: tag.color }
+                            ? { backgroundColor: tag.color, borderColor: tag.color, color: "white" }
                             : { borderColor: tag.color, color: tag.color }
                         }
                         onClick={() => toggleTag(tag.id)}
@@ -276,48 +287,37 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
                   })}
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Token Info</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm">
+          <div className="rounded-xl border bg-white">
+            <div className="border-b px-6 py-4">
+              <h3 className="text-sm font-medium">Token Budget</h3>
+            </div>
+            <div className="space-y-3 p-6 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Estimated tokens</span>
-                <span className="font-mono">{tokenEstimate}</span>
+                <span className="text-muted-foreground">Estimated</span>
+                <span className="font-mono tabular-nums">{tokenEstimate}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Budget status</span>
-                <span
-                  className={
-                    tokenEstimate > 5000
-                      ? "text-destructive"
-                      : tokenEstimate > 3000
-                        ? "text-amber-600"
-                        : "text-green-600"
-                  }
-                >
-                  {tokenEstimate > 5000
-                    ? "Over budget"
-                    : tokenEstimate > 3000
-                      ? "Near limit"
-                      : "Good"}
-                </span>
+              <div className="h-1.5 overflow-hidden rounded-full bg-zinc-100">
+                <div
+                  className={`h-full rounded-full transition-all ${
+                    tokenEstimate > 5000 ? "bg-red-500" : tokenEstimate > 3000 ? "bg-amber-500" : "bg-emerald-500"
+                  }`}
+                  style={{ width: `${Math.min((tokenEstimate / 5000) * 100, 100)}%` }}
+                />
               </div>
-            </CardContent>
-          </Card>
+              <p className="text-xs text-muted-foreground">
+                {tokenEstimate > 5000 ? "Over budget" : tokenEstimate > 3000 ? "Near limit" : "Within budget"} (target: &lt;5000)
+              </p>
+            </div>
+          </div>
 
           <div className="flex gap-2">
             <Button type="submit" className="flex-1" disabled={saving}>
-              {saving ? "Saving..." : mode === "edit" ? "Update" : "Create"}
+              {saving ? "Saving..." : mode === "edit" ? "Update Skill" : "Create Skill"}
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.back()}
-            >
+            <Button type="button" variant="outline" onClick={() => router.back()}>
               Cancel
             </Button>
           </div>

@@ -61,7 +61,24 @@ The database is persisted in a Docker volume (`skills-data`). Configure credenti
 
 ## MCP Server Setup
 
-Add this to your Claude Code MCP configuration (`~/.claude.json` or project `.mcp.json`):
+### Remote (recommended)
+
+Connect to the hosted instance via HTTP. Add to `~/.claude.json` or project `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "ai-skills": {
+      "type": "url",
+      "url": "https://ai-skills.pavlin.dev/api/mcp"
+    }
+  }
+}
+```
+
+### Local (stdio)
+
+For local development, run the MCP server as a subprocess:
 
 ```json
 {

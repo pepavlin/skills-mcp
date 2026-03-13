@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -22,24 +21,17 @@ interface Stats {
   }>;
 }
 
-const typeLabels: Record<string, string> = {
-  prompt: "Prompts",
-  workflow: "Workflows",
-  technique: "Techniques",
-  snippet: "Snippets",
-  config: "Configs",
-};
-
-const typeColors: Record<string, string> = {
-  prompt: "bg-blue-100 text-blue-800",
-  workflow: "bg-purple-100 text-purple-800",
-  technique: "bg-green-100 text-green-800",
-  snippet: "bg-orange-100 text-orange-800",
-  config: "bg-gray-100 text-gray-800",
+const typeConfig: Record<string, { label: string; color: string; bg: string }> = {
+  prompt: { label: "Prompt", color: "text-blue-700", bg: "bg-blue-50 border-blue-100" },
+  workflow: { label: "Workflow", color: "text-violet-700", bg: "bg-violet-50 border-violet-100" },
+  technique: { label: "Technique", color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-100" },
+  snippet: { label: "Snippet", color: "text-amber-700", bg: "bg-amber-50 border-amber-100" },
+  config: { label: "Config", color: "text-zinc-700", bg: "bg-zinc-50 border-zinc-200" },
 };
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     fetch("/api/stats")
@@ -47,115 +39,117 @@ export default function DashboardPage() {
       .then(setStats);
   }, []);
 
+  const mcpConfig = JSON.stringify(
+    {
+      mcpServers: {
+        "ai-skills": {
+          type: "url",
+          url: "https://ai-skills.pavlin.dev/api/mcp",
+        },
+      },
+    },
+    null,
+    2
+  );
+
+  function copyConfig() {
+    navigator.clipboard.writeText(mcpConfig);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
   if (!stats) {
-    return <p className="text-muted-foreground">Loading dashboard...</p>;
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900" />
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Overview of your AI skills collection
+          <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Your AI skills at a glance
           </p>
         </div>
         <Link href="/dashboard/skills/new">
-          <Button>+ New Skill</Button>
+          <Button className="gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            New Skill
+          </Button>
         </Link>
       </div>
 
-      {/* Stats cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Skills
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{stats.totalSkills}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Tags
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{stats.totalTags}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Types
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(stats.byType).map(([type, count]) => (
-                <span
-                  key={type}
-                  className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium ${typeColors[type] || ""}`}
-                >
-                  {typeLabels[type] || type}: {count}
-                </span>
-              ))}
-              {Object.keys(stats.byType).length === 0 && (
-                <span className="text-sm text-muted-foreground">
-                  No skills yet
-                </span>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+      {/* Stats */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-xl border bg-white p-5">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Skills</p>
+          <p className="mt-2 text-3xl font-semibold tabular-nums">{stats.totalSkills}</p>
+        </div>
+        <div className="rounded-xl border bg-white p-5">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Tags</p>
+          <p className="mt-2 text-3xl font-semibold tabular-nums">{stats.totalTags}</p>
+        </div>
+        {Object.entries(stats.byType).slice(0, 2).map(([type, count]) => (
+          <div key={type} className="rounded-xl border bg-white p-5">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              {typeConfig[type]?.label || type}s
+            </p>
+            <p className="mt-2 text-3xl font-semibold tabular-nums">{count}</p>
+          </div>
+        ))}
       </div>
 
-      {/* Recent skills */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Skills</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {stats.recentSkills.length === 0 ? (
-            <div className="py-8 text-center">
-              <p className="text-muted-foreground">No skills yet.</p>
-              <Link href="/dashboard/skills/new">
-                <Button variant="outline" className="mt-2">
-                  Create your first skill
-                </Button>
+      <div className="grid gap-6 lg:grid-cols-5">
+        {/* Recent skills */}
+        <div className="lg:col-span-3">
+          <div className="rounded-xl border bg-white">
+            <div className="flex items-center justify-between border-b px-6 py-4">
+              <h2 className="font-semibold">Recent Skills</h2>
+              <Link href="/dashboard/skills" className="text-sm text-muted-foreground hover:text-foreground">
+                View all
               </Link>
             </div>
-          ) : (
-            <div className="space-y-3">
-              {stats.recentSkills.map((skill) => (
-                <Link
-                  key={skill.id}
-                  href={`/dashboard/skills/${skill.id}`}
-                  className="block rounded-lg border p-3 transition-colors hover:bg-muted/50"
-                >
-                  <div className="flex items-start justify-between gap-2">
+            {stats.recentSkills.length === 0 ? (
+              <div className="px-6 py-12 text-center">
+                <p className="text-sm text-muted-foreground">No skills yet.</p>
+                <Link href="/dashboard/skills/new">
+                  <Button variant="outline" size="sm" className="mt-3">
+                    Create your first skill
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="divide-y">
+                {stats.recentSkills.map((skill) => (
+                  <Link
+                    key={skill.id}
+                    href={`/dashboard/skills/${skill.id}`}
+                    className="flex items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-zinc-50"
+                  >
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-medium">{skill.name}</h3>
-                        <span
-                          className={`rounded px-1.5 py-0.5 text-xs font-medium ${typeColors[skill.type] || ""}`}
-                        >
-                          {skill.type}
+                      <div className="flex items-center gap-2.5">
+                        <span className="font-medium">{skill.name}</span>
+                        <span className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${typeConfig[skill.type]?.bg || ""} ${typeConfig[skill.type]?.color || ""}`}>
+                          {typeConfig[skill.type]?.label || skill.type}
                         </span>
                       </div>
-                      <p className="mt-1 line-clamp-1 text-sm text-muted-foreground">
+                      <p className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">
                         {skill.description}
                       </p>
                       {skill.tags.length > 0 && (
-                        <div className="mt-2 flex gap-1">
+                        <div className="mt-1.5 flex gap-1">
                           {skill.tags.map((tag) => (
                             <Badge
                               key={tag.id}
                               variant="outline"
-                              className="text-xs"
+                              className="h-5 text-[10px] font-normal"
                               style={{ borderColor: tag.color, color: tag.color }}
                             >
                               {tag.name}
@@ -164,101 +158,109 @@ export default function DashboardPage() {
                         </div>
                       )}
                     </div>
-                    {skill.tokenEstimate && (
-                      <span className="whitespace-nowrap text-xs text-muted-foreground">
-                        ~{skill.tokenEstimate} tokens
-                      </span>
-                    )}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                    <div className="text-right">
+                      {skill.tokenEstimate && (
+                        <p className="text-xs tabular-nums text-muted-foreground">
+                          ~{skill.tokenEstimate} tok
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
 
-      {/* MCP Config info */}
-      <Card>
-        <CardHeader>
-          <CardTitle>MCP Server Setup</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <h3 className="mb-2 text-sm font-medium">1. Installation</h3>
-            <p className="mb-2 text-sm text-muted-foreground">
-              Add this to your Claude Code MCP config ({" "}
-              <code className="rounded bg-muted px-1 py-0.5 text-xs">~/.claude.json</code>{" "}
-              or project{" "}
-              <code className="rounded bg-muted px-1 py-0.5 text-xs">.mcp.json</code>):
-            </p>
-            <pre className="overflow-x-auto rounded-lg bg-muted p-4 text-sm">
-              {JSON.stringify(
-                {
-                  mcpServers: {
-                    "ai-skills": {
-                      command: "npx",
-                      args: ["tsx", "src/mcp/stdio.ts"],
-                      cwd: "/path/to/skills-mcp",
-                    },
-                  },
-                },
-                null,
-                2
+        {/* Type breakdown */}
+        <div className="lg:col-span-2">
+          <div className="rounded-xl border bg-white">
+            <div className="border-b px-6 py-4">
+              <h2 className="font-semibold">By Type</h2>
+            </div>
+            <div className="p-6">
+              {Object.keys(stats.byType).length === 0 ? (
+                <p className="text-sm text-muted-foreground">No skills yet</p>
+              ) : (
+                <div className="space-y-3">
+                  {Object.entries(stats.byType).map(([type, count]) => {
+                    const pct = stats.totalSkills > 0 ? (count / stats.totalSkills) * 100 : 0;
+                    const cfg = typeConfig[type];
+                    return (
+                      <div key={type}>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className={`font-medium ${cfg?.color || ""}`}>
+                            {cfg?.label || type}
+                          </span>
+                          <span className="tabular-nums text-muted-foreground">{count}</span>
+                        </div>
+                        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-zinc-100">
+                          <div
+                            className="h-full rounded-full bg-zinc-900 transition-all"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
-            </pre>
+            </div>
           </div>
+        </div>
+      </div>
 
-          <div>
-            <h3 className="mb-2 text-sm font-medium">2. Available MCP Tools</h3>
-            <div className="space-y-2">
-              <div className="rounded-lg border p-3">
-                <code className="text-sm font-semibold text-blue-600">search_skills</code>
-                <span className="ml-2 text-sm text-muted-foreground">
-                  (query, tags?, type?, limit?)
-                </span>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Search skills by keyword. Returns metadata only (name, description, type, tags).
-                </p>
+      {/* MCP Setup */}
+      <div className="rounded-xl border bg-white">
+        <div className="border-b px-6 py-4">
+          <h2 className="font-semibold">Connect via MCP</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Add this MCP server to your AI assistant to access your skills
+          </p>
+        </div>
+        <div className="p-6">
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* Config */}
+            <div>
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="text-sm font-medium">Configuration</h3>
+                <Button variant="outline" size="sm" onClick={copyConfig} className="h-7 text-xs">
+                  {copied ? "Copied!" : "Copy"}
+                </Button>
               </div>
-              <div className="rounded-lg border p-3">
-                <code className="text-sm font-semibold text-blue-600">get_skill</code>
-                <span className="ml-2 text-sm text-muted-foreground">
-                  (identifier)
-                </span>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Get full content of a skill by ID, slug, or name. Use after searching.
-                </p>
-              </div>
-              <div className="rounded-lg border p-3">
-                <code className="text-sm font-semibold text-blue-600">list_skills</code>
-                <span className="ml-2 text-sm text-muted-foreground">
-                  (type?, tags?, limit?, offset?)
-                </span>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Browse all skills with optional filtering. Returns lightweight metadata.
-                </p>
-              </div>
-              <div className="rounded-lg border p-3">
-                <code className="text-sm font-semibold text-blue-600">list_tags</code>
-                <span className="ml-2 text-sm text-muted-foreground">()</span>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  List all tags/categories with skill counts.
-                </p>
+              <p className="mb-3 text-xs text-muted-foreground">
+                Add to <code className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono">~/.claude.json</code> or project <code className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono">.mcp.json</code>
+              </p>
+              <pre className="overflow-x-auto rounded-lg bg-zinc-950 p-4 font-mono text-sm text-zinc-300">
+                {mcpConfig}
+              </pre>
+            </div>
+
+            {/* Tools reference */}
+            <div>
+              <h3 className="mb-3 text-sm font-medium">Available Tools</h3>
+              <div className="space-y-2.5">
+                {[
+                  { name: "search_skills", params: "query, tags?, type?", desc: "Find skills by keyword and filters" },
+                  { name: "get_skill", params: "identifier", desc: "Get full content of a specific skill" },
+                  { name: "list_skills", params: "type?, tags?, limit?", desc: "Browse all available skills" },
+                  { name: "list_tags", params: "", desc: "List all tags with skill counts" },
+                ].map((tool) => (
+                  <div key={tool.name} className="rounded-lg border border-zinc-100 bg-zinc-50/50 px-4 py-3">
+                    <div className="flex items-baseline gap-2">
+                      <code className="text-sm font-semibold">{tool.name}</code>
+                      {tool.params && (
+                        <span className="text-xs text-muted-foreground">({tool.params})</span>
+                      )}
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{tool.desc}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-
-          <div>
-            <h3 className="mb-2 text-sm font-medium">3. How AI Uses It</h3>
-            <p className="text-sm text-muted-foreground">
-              Once connected, your AI assistant can discover and apply your skills automatically.
-              For example, it can call <code className="rounded bg-muted px-1 py-0.5 text-xs">search_skills(&quot;react component&quot;)</code> to
-              find relevant techniques, then <code className="rounded bg-muted px-1 py-0.5 text-xs">get_skill(&quot;react-component-builder&quot;)</code> to
-              load the full instructions.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
