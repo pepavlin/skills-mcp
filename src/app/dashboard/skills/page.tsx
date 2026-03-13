@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ZapIcon, PlusIcon, SearchIcon, PencilIcon } from "lucide-react";
 
 interface Skill {
   id: string;
@@ -35,6 +36,14 @@ const typeLabels: Record<string, string> = {
   technique: "Technique",
   snippet: "Snippet",
   config: "Config",
+};
+
+const typeBadgeClass: Record<string, string> = {
+  prompt: "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
+  workflow: "bg-violet-50 text-violet-700 ring-1 ring-violet-200",
+  technique: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
+  snippet: "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
+  config: "bg-slate-100 text-slate-600 ring-1 ring-slate-200",
 };
 
 export default function SkillsListPage() {
@@ -71,35 +80,38 @@ export default function SkillsListPage() {
   }, []);
 
   return (
-    <div className="space-y-4">
-      {/* Header row */}
+    <div className="space-y-6">
+      {/* Page header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-sm font-medium text-zinc-500">
-          Skills <span className="tabular-nums text-zinc-400">({total})</span>
-        </h1>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Skills</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {total} {total === 1 ? "skill" : "skills"} total
+          </p>
+        </div>
         <Link
           href="/dashboard/skills/new"
-          className="rounded bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-800"
+          className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98]"
+          style={{ background: "linear-gradient(135deg, oklch(0.62 0.22 277), oklch(0.55 0.25 300))" }}
         >
-          + New Skill
+          <PlusIcon className="h-4 w-4" />
+          New Skill
         </Link>
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1 max-w-xs">
-          <svg className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search..."
+            placeholder="Search skills..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="h-8 pl-8 text-xs"
+            className="h-9 pl-9"
           />
         </div>
         <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v ?? "all")}>
-          <SelectTrigger className="h-8 w-28 text-xs">
+          <SelectTrigger className="h-9 w-32">
             <SelectValue placeholder="All types" />
           </SelectTrigger>
           <SelectContent>
@@ -112,7 +124,7 @@ export default function SkillsListPage() {
           </SelectContent>
         </Select>
         <Select value={tagFilter} onValueChange={(v) => setTagFilter(v ?? "all")}>
-          <SelectTrigger className="h-8 w-28 text-xs">
+          <SelectTrigger className="h-9 w-32">
             <SelectValue placeholder="All tags" />
           </SelectTrigger>
           <SelectContent>
@@ -128,52 +140,76 @@ export default function SkillsListPage() {
 
       {/* Table */}
       {loading ? (
-        <div className="flex h-32 items-center justify-center">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900" />
+        <div className="flex h-48 items-center justify-center rounded-xl border border-border bg-card">
+          <div className="flex flex-col items-center gap-3">
+            <div className="h-7 w-7 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+            <p className="text-sm text-muted-foreground">Loading skills...</p>
+          </div>
         </div>
       ) : skills.length === 0 ? (
-        <div className="rounded-lg border bg-white py-12 text-center text-sm text-zinc-400">
-          {query || typeFilter !== "all" || tagFilter !== "all"
-            ? "No skills match your filters."
-            : "No skills yet."}
+        <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-card py-20 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-muted">
+            <ZapIcon className="h-7 w-7 text-muted-foreground" />
+          </div>
+          <p className="mt-4 text-base font-semibold">
+            {query || typeFilter !== "all" || tagFilter !== "all"
+              ? "No skills match your filters"
+              : "No skills yet"}
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {query || typeFilter !== "all" || tagFilter !== "all"
+              ? "Try adjusting your search or filters."
+              : "Create your first skill to get started."}
+          </p>
+          {!query && typeFilter === "all" && tagFilter === "all" && (
+            <Link
+              href="/dashboard/skills/new"
+              className="mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-all hover:opacity-90"
+              style={{ background: "linear-gradient(135deg, oklch(0.62 0.22 277), oklch(0.55 0.25 300))" }}
+            >
+              <PlusIcon className="h-4 w-4" />
+              New Skill
+            </Link>
+          )}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border bg-white">
-          <table className="w-full text-sm">
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+          <table className="w-full">
             <thead>
-              <tr className="border-b text-left text-xs text-zinc-400">
-                <th className="px-4 py-2 font-medium">Name</th>
-                <th className="px-4 py-2 font-medium">Type</th>
-                <th className="px-4 py-2 font-medium">Tags</th>
-                <th className="px-4 py-2 font-medium text-right">Tokens</th>
-                <th className="px-4 py-2 font-medium text-right">Updated</th>
+              <tr className="border-b border-border bg-muted/30 text-left">
+                <th className="px-6 py-3 text-xs font-medium text-muted-foreground">Name</th>
+                <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Type</th>
+                <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Tags</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">Tokens</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">Updated</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y">
+            <tbody className="divide-y divide-border">
               {skills.map((skill) => (
-                <tr key={skill.id} className="hover:bg-zinc-50">
-                  <td className="px-4 py-2.5">
+                <tr key={skill.id} className="group transition-colors hover:bg-muted/30">
+                  <td className="px-6 py-4">
                     <Link
                       href={`/dashboard/skills/${skill.id}`}
-                      className="font-medium text-zinc-900 hover:underline"
+                      className="font-medium text-foreground hover:text-primary transition-colors"
                     >
                       {skill.name}
                     </Link>
-                    <p className="mt-0.5 line-clamp-1 text-xs text-zinc-400">
+                    <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
                       {skill.description}
                     </p>
                   </td>
-                  <td className="px-4 py-2.5">
-                    <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-600">
+                  <td className="px-4 py-4">
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${typeBadgeClass[skill.type] || "bg-muted text-muted-foreground"}`}>
                       {typeLabels[skill.type] || skill.type}
                     </span>
                   </td>
-                  <td className="px-4 py-2.5">
-                    <div className="flex gap-1">
+                  <td className="px-4 py-4">
+                    <div className="flex flex-wrap gap-1">
                       {skill.tags.map((tag) => (
                         <span
                           key={tag.id}
-                          className="rounded px-1.5 py-0.5 text-[11px]"
+                          className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
                           style={{ backgroundColor: tag.color + "18", color: tag.color }}
                         >
                           {tag.name}
@@ -181,11 +217,20 @@ export default function SkillsListPage() {
                       ))}
                     </div>
                   </td>
-                  <td className="px-4 py-2.5 text-right tabular-nums text-zinc-500">
+                  <td className="px-4 py-4 text-right text-xs tabular-nums text-muted-foreground">
                     {skill.tokenEstimate ? `~${skill.tokenEstimate}` : "—"}
                   </td>
-                  <td className="px-4 py-2.5 text-right text-xs text-zinc-400">
+                  <td className="px-4 py-4 text-right text-xs text-muted-foreground">
                     {new Date(skill.updatedAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <Link
+                      href={`/dashboard/skills/${skill.id}`}
+                      className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-muted-foreground opacity-0 transition-all group-hover:opacity-100 hover:bg-muted hover:text-foreground"
+                    >
+                      <PencilIcon className="h-3 w-3" />
+                      Edit
+                    </Link>
                   </td>
                 </tr>
               ))}

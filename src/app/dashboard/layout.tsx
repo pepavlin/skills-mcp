@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { SuggestChangeButton } from "@/components/suggest-change-button";
+import { LayoutDashboardIcon, ZapIcon, TagIcon, LogOutIcon } from "lucide-react";
 
 const navItems = [
-  { href: "/dashboard", label: "Overview", exact: true },
-  { href: "/dashboard/skills", label: "Skills", exact: false },
-  { href: "/dashboard/tags", label: "Tags", exact: false },
+  { href: "/dashboard", label: "Overview", exact: true, icon: LayoutDashboardIcon },
+  { href: "/dashboard/skills", label: "Skills", exact: false, icon: ZapIcon },
+  { href: "/dashboard/tags", label: "Tags", exact: false, icon: TagIcon },
 ];
 
 export default function DashboardLayout({
@@ -37,55 +38,68 @@ export default function DashboardLayout({
   if (checking) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900" />
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-background">
       {/* Top bar */}
-      <header className="sticky top-0 z-50 border-b bg-white">
-        <div className="flex h-11 items-center justify-between px-4">
-          <div className="flex items-center gap-6">
-            <Link href="/dashboard" className="flex items-center gap-2 text-sm font-semibold">
-              <span className="flex h-5 w-5 items-center justify-center rounded bg-zinc-900 text-[10px] font-bold text-white">
-                S
-              </span>
-              AI Skills
+      <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-sm">
+        <div className="flex h-14 items-center justify-between px-6 max-w-6xl mx-auto">
+          <div className="flex items-center gap-8">
+            {/* Logo */}
+            <Link href="/dashboard" className="flex items-center gap-2.5 group">
+              <div
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-white shadow-sm transition-shadow group-hover:shadow-md"
+                style={{ background: "linear-gradient(135deg, oklch(0.62 0.22 277), oklch(0.55 0.25 300))" }}
+              >
+                <ZapIcon className="h-3.5 w-3.5" />
+              </div>
+              <span className="text-sm font-semibold tracking-tight">AI Skills</span>
             </Link>
+
+            {/* Navigation */}
             <nav className="flex items-center gap-1">
               {navItems.map((item) => {
                 const isActive = item.exact
                   ? pathname === item.href
                   : pathname.startsWith(item.href);
+                const Icon = item.icon;
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${
+                    className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${
                       isActive
-                        ? "bg-zinc-100 text-zinc-900"
-                        : "text-zinc-500 hover:text-zinc-900"
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     }`}
                   >
+                    <Icon className="h-3.5 w-3.5" />
                     {item.label}
                   </Link>
                 );
               })}
             </nav>
           </div>
+
           <button
             onClick={handleLogout}
-            className="text-xs text-zinc-400 hover:text-zinc-700"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
           >
-            Sign out
+            <LogOutIcon className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Sign out</span>
           </button>
         </div>
       </header>
 
       {/* Content */}
-      <main className="mx-auto max-w-5xl px-4 py-5">{children}</main>
+      <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
 
       <SuggestChangeButton />
     </div>

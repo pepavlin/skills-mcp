@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { SaveIcon, XIcon } from "lucide-react";
 
 interface Tag {
   id: string;
@@ -110,28 +111,43 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
     }
   }
 
+  const tokenPercent = Math.min((tokenEstimate / 5000) * 100, 100);
+  const tokenColor =
+    tokenEstimate > 5000
+      ? "bg-red-500"
+      : tokenEstimate > 3000
+      ? "bg-amber-500"
+      : "bg-emerald-500";
+  const tokenTextColor =
+    tokenEstimate > 5000
+      ? "text-red-600"
+      : tokenEstimate > 3000
+      ? "text-amber-600"
+      : "text-muted-foreground";
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid gap-4 lg:grid-cols-3">
+    <form onSubmit={handleSubmit} className="space-y-0">
+      <div className="grid gap-6 lg:grid-cols-3">
         {/* Main fields */}
-        <div className="space-y-4 lg:col-span-2">
-          <div className="rounded-lg border bg-white p-4">
-            <div className="space-y-3">
-              <div className="space-y-1">
-                <Label htmlFor="name" className="text-xs">Name</Label>
+        <div className="space-y-6 lg:col-span-2">
+          <div className="rounded-xl border border-border bg-card shadow-sm p-6">
+            <h2 className="text-sm font-semibold mb-4">Skill details</h2>
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="name" className="text-sm font-medium">Name</Label>
                 <Input
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. React Component Builder"
-                  className="h-8 text-sm"
+                  className="h-10"
                 />
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="description" className="text-xs">Description</Label>
-                  <span className="text-[10px] tabular-nums text-zinc-400">
+                  <Label htmlFor="description" className="text-sm font-medium">Description</Label>
+                  <span className={`text-xs tabular-nums ${description.length < 20 && description.length > 0 ? "text-red-500" : "text-muted-foreground"}`}>
                     {description.length} chars
                   </span>
                 </div>
@@ -141,19 +157,18 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="What this skill does. Important for MCP discoverability."
                   rows={2}
-                  className="text-sm"
                 />
                 {description.length > 0 && description.length < 20 && (
-                  <p className="text-[10px] text-red-500">
-                    Too short for MCP discovery (min 20 chars)
+                  <p className="text-xs text-red-500">
+                    Too short for MCP discovery — min 20 characters
                   </p>
                 )}
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="content" className="text-xs">Content</Label>
-                  <span className={`text-[10px] tabular-nums ${tokenEstimate > 5000 ? "text-red-500" : tokenEstimate > 3000 ? "text-amber-500" : "text-zinc-400"}`}>
+                  <Label htmlFor="content" className="text-sm font-medium">Content</Label>
+                  <span className={`text-xs tabular-nums ${tokenTextColor}`}>
                     ~{tokenEstimate} tokens
                   </span>
                 </div>
@@ -162,8 +177,8 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   placeholder="Full skill content — instructions, prompt template, workflow steps, etc."
-                  rows={14}
-                  className="font-mono text-xs"
+                  rows={16}
+                  className="font-mono text-sm"
                 />
               </div>
             </div>
@@ -172,10 +187,10 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
 
         {/* Sidebar */}
         <div className="space-y-4">
-          <div className="rounded-lg border bg-white p-4">
-            <Label className="text-xs">Type</Label>
+          <div className="rounded-xl border border-border bg-card shadow-sm p-5">
+            <Label className="text-sm font-medium">Type</Label>
             <Select value={type} onValueChange={(v) => setType(v ?? "prompt")}>
-              <SelectTrigger className="mt-1 h-8 text-xs">
+              <SelectTrigger className="mt-2 h-10">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -188,20 +203,20 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
             </Select>
           </div>
 
-          <div className="rounded-lg border bg-white p-4">
-            <Label className="text-xs">Tags</Label>
+          <div className="rounded-xl border border-border bg-card shadow-sm p-5">
+            <Label className="text-sm font-medium">Tags</Label>
             {availableTags.length === 0 ? (
-              <p className="mt-1 text-xs text-zinc-400">No tags yet.</p>
+              <p className="mt-2 text-xs text-muted-foreground">No tags yet.</p>
             ) : (
-              <div className="mt-2 flex flex-wrap gap-1.5">
+              <div className="mt-3 flex flex-wrap gap-2">
                 {availableTags.map((tag) => {
                   const selected = selectedTagIds.includes(tag.id);
                   return (
                     <button
                       key={tag.id}
                       type="button"
-                      className={`rounded px-2 py-0.5 text-xs transition-colors ${
-                        selected ? "text-white" : ""
+                      className={`rounded-full px-3 py-1 text-xs font-medium transition-all hover:scale-105 ${
+                        selected ? "text-white shadow-sm" : ""
                       }`}
                       style={
                         selected
@@ -218,29 +233,40 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
             )}
           </div>
 
-          <div className="rounded-lg border bg-white p-4">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-zinc-400">Token budget</span>
-              <span className={`font-mono tabular-nums ${tokenEstimate > 5000 ? "text-red-500" : tokenEstimate > 3000 ? "text-amber-500" : "text-zinc-600"}`}>
+          <div className="rounded-xl border border-border bg-card shadow-sm p-5">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Token budget</span>
+              <span className={`font-mono text-xs tabular-nums ${tokenTextColor}`}>
                 {tokenEstimate} / 5000
               </span>
             </div>
-            <div className="mt-2 h-1 overflow-hidden rounded-full bg-zinc-100">
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
               <div
-                className={`h-full rounded-full transition-all ${
-                  tokenEstimate > 5000 ? "bg-red-500" : tokenEstimate > 3000 ? "bg-amber-500" : "bg-emerald-500"
-                }`}
-                style={{ width: `${Math.min((tokenEstimate / 5000) * 100, 100)}%` }}
+                className={`h-full rounded-full transition-all duration-300 ${tokenColor}`}
+                style={{ width: `${tokenPercent}%` }}
               />
             </div>
+            {tokenEstimate > 3000 && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {tokenEstimate > 5000
+                  ? "Over budget — consider splitting this skill."
+                  : "Getting large — consider trimming content."}
+              </p>
+            )}
           </div>
 
           <div className="flex gap-2">
-            <Button type="submit" size="sm" className="flex-1 text-xs" disabled={saving}>
+            <Button type="submit" className="flex-1" disabled={saving}>
+              <SaveIcon className="h-4 w-4 mr-1.5" />
               {saving ? "Saving..." : mode === "edit" ? "Update" : "Create"}
             </Button>
-            <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => router.back()}>
-              Cancel
+            <Button
+              type="button"
+              variant="outline"
+              className="px-3"
+              onClick={() => router.back()}
+            >
+              <XIcon className="h-4 w-4" />
             </Button>
           </div>
         </div>
