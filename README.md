@@ -47,6 +47,18 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) and log in with your admin credentials (default: admin/admin).
 
+## Docker
+
+```bash
+# Default port 3000
+docker compose up -d
+
+# Custom port
+PORT=8080 docker compose up -d
+```
+
+The database is persisted in a Docker volume (`skills-data`). Configure credentials via environment variables or `.env` file.
+
 ## MCP Server Setup
 
 Add this to your Claude Code MCP configuration (`~/.claude.json` or project `.mcp.json`):
