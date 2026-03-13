@@ -115,10 +115,18 @@ export function createMcpServer(): McpServer {
       };
 
       if (skill.parameters) {
-        output.parameters = JSON.parse(skill.parameters);
+        try {
+          output.parameters = JSON.parse(skill.parameters);
+        } catch {
+          output.parameters = skill.parameters;
+        }
       }
       if (skill.examples) {
-        output.examples = JSON.parse(skill.examples);
+        try {
+          output.examples = JSON.parse(skill.examples);
+        } catch {
+          output.examples = skill.examples;
+        }
       }
 
       return {

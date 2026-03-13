@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateCredentials, createSession } from "@/lib/auth";
+import { parseJsonBody, isErrorResponse } from "@/lib/api-utils";
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const { username, password } = body;
+  const body = await parseJsonBody(req);
+  if (isErrorResponse(body)) return body;
+
+  const { username, password } = body as { username?: string; password?: string };
 
   if (!username || !password) {
     return NextResponse.json(
@@ -12,7 +15,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (!validateCredentials(username, password)) {
+  if (!validateCredentials(String(username), String(password))) {
     return NextResponse.json(
       { error: "Invalid credentials" },
       { status: 401 }
@@ -25,7 +28,7 @@ export async function POST(req: NextRequest) {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: 86400, // 24 hours
+    maxAge: 86400,
     path: "/",
   });
 

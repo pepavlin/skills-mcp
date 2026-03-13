@@ -180,27 +180,83 @@ export default function DashboardPage() {
       {/* MCP Config info */}
       <Card>
         <CardHeader>
-          <CardTitle>MCP Server Configuration</CardTitle>
+          <CardTitle>MCP Server Setup</CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="mb-3 text-sm text-muted-foreground">
-            Add this to your Claude Code MCP settings to connect the AI Skills server:
-          </p>
-          <pre className="overflow-x-auto rounded-lg bg-muted p-4 text-sm">
-            {JSON.stringify(
-              {
-                mcpServers: {
-                  "ai-skills": {
-                    command: "npx",
-                    args: ["tsx", "src/mcp/stdio.ts"],
-                    cwd: "/path/to/skills-mcp",
+        <CardContent className="space-y-4">
+          <div>
+            <h3 className="mb-2 text-sm font-medium">1. Installation</h3>
+            <p className="mb-2 text-sm text-muted-foreground">
+              Add this to your Claude Code MCP config ({" "}
+              <code className="rounded bg-muted px-1 py-0.5 text-xs">~/.claude.json</code>{" "}
+              or project{" "}
+              <code className="rounded bg-muted px-1 py-0.5 text-xs">.mcp.json</code>):
+            </p>
+            <pre className="overflow-x-auto rounded-lg bg-muted p-4 text-sm">
+              {JSON.stringify(
+                {
+                  mcpServers: {
+                    "ai-skills": {
+                      command: "npx",
+                      args: ["tsx", "src/mcp/stdio.ts"],
+                      cwd: "/path/to/skills-mcp",
+                    },
                   },
                 },
-              },
-              null,
-              2
-            )}
-          </pre>
+                null,
+                2
+              )}
+            </pre>
+          </div>
+
+          <div>
+            <h3 className="mb-2 text-sm font-medium">2. Available MCP Tools</h3>
+            <div className="space-y-2">
+              <div className="rounded-lg border p-3">
+                <code className="text-sm font-semibold text-blue-600">search_skills</code>
+                <span className="ml-2 text-sm text-muted-foreground">
+                  (query, tags?, type?, limit?)
+                </span>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Search skills by keyword. Returns metadata only (name, description, type, tags).
+                </p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <code className="text-sm font-semibold text-blue-600">get_skill</code>
+                <span className="ml-2 text-sm text-muted-foreground">
+                  (identifier)
+                </span>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Get full content of a skill by ID, slug, or name. Use after searching.
+                </p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <code className="text-sm font-semibold text-blue-600">list_skills</code>
+                <span className="ml-2 text-sm text-muted-foreground">
+                  (type?, tags?, limit?, offset?)
+                </span>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Browse all skills with optional filtering. Returns lightweight metadata.
+                </p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <code className="text-sm font-semibold text-blue-600">list_tags</code>
+                <span className="ml-2 text-sm text-muted-foreground">()</span>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  List all tags/categories with skill counts.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="mb-2 text-sm font-medium">3. How AI Uses It</h3>
+            <p className="text-sm text-muted-foreground">
+              Once connected, your AI assistant can discover and apply your skills automatically.
+              For example, it can call <code className="rounded bg-muted px-1 py-0.5 text-xs">search_skills(&quot;react component&quot;)</code> to
+              find relevant techniques, then <code className="rounded bg-muted px-1 py-0.5 text-xs">get_skill(&quot;react-component-builder&quot;)</code> to
+              load the full instructions.
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>

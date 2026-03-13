@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { getSkill, updateSkill, deleteSkill } from "@/lib/skills";
+import { parseJsonBody, isErrorResponse } from "@/lib/api-utils";
 
 export async function GET(
   req: NextRequest,
@@ -25,8 +26,10 @@ export async function PUT(
   if (authError) return authError;
 
   const { id } = await params;
-  const body = await req.json();
-  const skill = await updateSkill(id, body);
+  const body = await parseJsonBody(req);
+  if (isErrorResponse(body)) return body;
+
+  const skill = await updateSkill(id, body as Record<string, unknown>);
   if (!skill) {
     return NextResponse.json({ error: "Skill not found" }, { status: 404 });
   }

@@ -164,7 +164,13 @@ ${skill.content}`;
               </CardHeader>
               <CardContent>
                 <pre className="whitespace-pre-wrap rounded-lg bg-muted p-4 font-mono text-sm">
-                  {JSON.stringify(JSON.parse(skill.parameters), null, 2)}
+                  {(() => {
+                    try {
+                      return JSON.stringify(JSON.parse(skill.parameters!), null, 2);
+                    } catch {
+                      return skill.parameters;
+                    }
+                  })()}
                 </pre>
               </CardContent>
             </Card>
@@ -177,7 +183,13 @@ ${skill.content}`;
               </CardHeader>
               <CardContent>
                 <pre className="whitespace-pre-wrap rounded-lg bg-muted p-4 font-mono text-sm">
-                  {JSON.stringify(JSON.parse(skill.examples), null, 2)}
+                  {(() => {
+                    try {
+                      return JSON.stringify(JSON.parse(skill.examples!), null, 2);
+                    } catch {
+                      return skill.examples;
+                    }
+                  })()}
                 </pre>
               </CardContent>
             </Card>

@@ -1,5 +1,5 @@
 import { db, schema } from "@/db";
-import { eq, like, and, inArray, sql } from "drizzle-orm";
+import { eq, and, inArray, sql } from "drizzle-orm";
 import { v4 as uuid } from "uuid";
 
 export type SkillType = "prompt" | "workflow" | "technique" | "snippet" | "config";
@@ -60,7 +60,8 @@ export async function createSkill(input: SkillInput): Promise<SkillWithTags> {
     }
   }
 
-  return getSkill(id) as Promise<SkillWithTags>;
+  const skill = await getSkill(id);
+  return skill as SkillWithTags;
 }
 
 export async function updateSkill(
