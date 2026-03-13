@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Skills MCP
+
+Personal AI skills knowledge base with MCP (Model Context Protocol) integration. Store, organize, and serve your AI skills/prompts/techniques through a web dashboard and an MCP server that AI assistants can query directly.
+
+## Features
+
+- **Web Dashboard** — Admin UI for creating, editing, searching, and organizing AI skills
+- **MCP Server** — Exposes skills as MCP tools so AI assistants (Claude Code, Cursor, etc.) can search and retrieve skills
+- **Skill Types** — Prompts, workflows, techniques, snippets, configs
+- **Tagging System** — Organize skills with colored tags
+- **Token Tracking** — Estimates token count per skill with budget warnings
+- **SKILL.md Export** — Compatible with the Agent Skills standard (agentskills.io)
+
+## Tech Stack
+
+- Next.js 15 (App Router)
+- SQLite + Drizzle ORM
+- shadcn/ui + Tailwind CSS
+- @modelcontextprotocol/sdk
 
 ## Getting Started
 
-First, run the development server:
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Set up environment
+
+```bash
+cp .env.example .env.local
+# Edit .env.local to set ADMIN_USERNAME and ADMIN_PASSWORD
+```
+
+### 3. Initialize the database
+
+```bash
+npm run db:migrate
+```
+
+### 4. Start the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) and log in with your admin credentials (default: admin/admin).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## MCP Server Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Add this to your Claude Code MCP configuration (`~/.claude.json` or project `.mcp.json`):
 
-## Learn More
+```json
+{
+  "mcpServers": {
+    "ai-skills": {
+      "command": "npx",
+      "args": ["tsx", "src/mcp/stdio.ts"],
+      "cwd": "/absolute/path/to/skills-mcp"
+    }
+  }
+}
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Available MCP Tools
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Tool | Description |
+|---|---|
+| `search_skills` | Search skills by keyword, tags, or type |
+| `get_skill` | Get full content of a specific skill |
+| `list_skills` | Browse all skills with optional filters |
+| `list_tags` | List available tags/categories |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+```
+src/
+├── app/                 # Next.js pages & API routes
+│   ├── api/             # REST API (skills, tags, auth)
+│   ├── dashboard/       # Admin dashboard pages
+│   └── login/           # Login page
+├── components/          # React components (skill-form, ui/)
+├── db/                  # Database schema & migrations
+├── lib/                 # Business logic (skills, tags, auth)
+├── mcp/                 # MCP server (stdio transport)
+└── test/                # Tests
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Script | Description |
+|---|---|
+| `npm run dev` | Start Next.js dev server |
+| `npm run build` | Build for production |
+| `npm run db:migrate` | Initialize/migrate the database |
+| `npm run mcp:stdio` | Run MCP server standalone |
+| `npm test` | Run tests |
+| `npm run test:watch` | Run tests in watch mode |
+
+## Data Model
+
+- **Skills** — id, name, slug, description, content, type, parameters (JSON), examples (JSON), token estimate
+- **Tags** — id, name, color
+- **Skill-Tags** — many-to-many relationship
