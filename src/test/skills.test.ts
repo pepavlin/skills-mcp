@@ -17,8 +17,6 @@ beforeAll(() => {
       description TEXT NOT NULL,
       content TEXT NOT NULL,
       type TEXT NOT NULL CHECK(type IN ('prompt', 'workflow', 'technique', 'snippet', 'config')),
-      parameters TEXT,
-      examples TEXT,
       token_estimate INTEGER,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL

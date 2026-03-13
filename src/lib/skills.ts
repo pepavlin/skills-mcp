@@ -9,8 +9,6 @@ export interface SkillInput {
   description: string;
   content: string;
   type: SkillType;
-  parameters?: string;
-  examples?: string;
   tagIds?: string[];
 }
 
@@ -44,8 +42,6 @@ export async function createSkill(input: SkillInput): Promise<SkillWithTags> {
       description: input.description,
       content: input.content,
       type: input.type,
-      parameters: input.parameters || null,
-      examples: input.examples || null,
       tokenEstimate,
       createdAt: now,
       updatedAt: now,
@@ -86,9 +82,6 @@ export async function updateSkill(
   if (input.description !== undefined) updates.description = input.description;
   if (input.content !== undefined) updates.content = input.content;
   if (input.type !== undefined) updates.type = input.type;
-  if (input.parameters !== undefined) updates.parameters = input.parameters;
-  if (input.examples !== undefined) updates.examples = input.examples;
-
   if (input.content !== undefined || input.description !== undefined) {
     const desc = input.description ?? existing.description;
     const content = input.content ?? existing.content;

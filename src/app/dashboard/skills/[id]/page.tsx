@@ -16,8 +16,6 @@ interface SkillData {
   description: string;
   content: string;
   type: string;
-  parameters: string | null;
-  examples: string | null;
   tokenEstimate: number | null;
   createdAt: string;
   updatedAt: string;
@@ -31,14 +29,6 @@ const typeConfig: Record<string, { label: string; color: string; bg: string }> =
   snippet: { label: "Snippet", color: "text-amber-700", bg: "bg-amber-50 border-amber-100" },
   config: { label: "Config", color: "text-zinc-700", bg: "bg-zinc-50 border-zinc-200" },
 };
-
-function safeJsonFormat(json: string): string {
-  try {
-    return JSON.stringify(JSON.parse(json), null, 2);
-  } catch {
-    return json;
-  }
-}
 
 export default function SkillDetailPage() {
   const router = useRouter();
@@ -174,31 +164,6 @@ export default function SkillDetailPage() {
             </div>
           </div>
 
-          {skill.parameters && (
-            <div className="rounded-xl border bg-white">
-              <div className="border-b px-6 py-4">
-                <h3 className="text-sm font-medium">Parameters</h3>
-              </div>
-              <div className="p-6">
-                <pre className="whitespace-pre-wrap font-mono text-sm text-zinc-700">
-                  {safeJsonFormat(skill.parameters)}
-                </pre>
-              </div>
-            </div>
-          )}
-
-          {skill.examples && (
-            <div className="rounded-xl border bg-white">
-              <div className="border-b px-6 py-4">
-                <h3 className="text-sm font-medium">Examples</h3>
-              </div>
-              <div className="p-6">
-                <pre className="whitespace-pre-wrap font-mono text-sm text-zinc-700">
-                  {safeJsonFormat(skill.examples)}
-                </pre>
-              </div>
-            </div>
-          )}
         </TabsContent>
 
         <TabsContent value="edit" className="mt-6">
@@ -210,8 +175,6 @@ export default function SkillDetailPage() {
               description: skill.description,
               content: skill.content,
               type: skill.type,
-              parameters: skill.parameters || "",
-              examples: skill.examples || "",
               tags: skill.tags,
             }}
           />

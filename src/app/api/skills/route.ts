@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
   const body = await parseJsonBody(req);
   if (isErrorResponse(body)) return body;
 
-  const { name, description, content, type, parameters, examples, tagIds } =
+  const { name, description, content, type, tagIds } =
     body as Record<string, unknown>;
 
   if (!name || !description || !content || !type) {
@@ -51,29 +51,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid type" }, { status: 400 });
   }
 
-  if (parameters && typeof parameters === "string") {
-    try {
-      JSON.parse(parameters);
-    } catch {
-      return NextResponse.json({ error: "parameters must be valid JSON" }, { status: 400 });
-    }
-  }
-
-  if (examples && typeof examples === "string") {
-    try {
-      JSON.parse(examples);
-    } catch {
-      return NextResponse.json({ error: "examples must be valid JSON" }, { status: 400 });
-    }
-  }
-
   const skill = await createSkill({
     name: String(name),
     description: String(description),
     content: String(content),
     type: String(type) as SkillType,
-    parameters: parameters ? String(parameters) : undefined,
-    examples: examples ? String(examples) : undefined,
     tagIds: Array.isArray(tagIds) ? tagIds.map(String) : undefined,
   });
 

@@ -28,8 +28,6 @@ interface SkillData {
   description: string;
   content: string;
   type: string;
-  parameters?: string;
-  examples?: string;
   tags?: Tag[];
 }
 
@@ -44,16 +42,11 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
   const [description, setDescription] = useState(initialData?.description || "");
   const [content, setContent] = useState(initialData?.content || "");
   const [type, setType] = useState(initialData?.type || "prompt");
-  const [parameters, setParameters] = useState(initialData?.parameters || "");
-  const [examples, setExamples] = useState(initialData?.examples || "");
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>(
     initialData?.tags?.map((t) => t.id) || []
   );
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [saving, setSaving] = useState(false);
-  const [showOptional, setShowOptional] = useState(
-    !!(initialData?.parameters || initialData?.examples)
-  );
 
   const tokenEstimate = Math.ceil((content.length + description.length) / 4);
 
@@ -90,8 +83,6 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
         description,
         content,
         type,
-        parameters: parameters || undefined,
-        examples: examples || undefined,
         tagIds: selectedTagIds,
       };
 
@@ -185,53 +176,6 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
             </div>
           </div>
 
-          {/* Optional fields - collapsible */}
-          <div className="rounded-xl border bg-white">
-            <button
-              type="button"
-              className="flex w-full items-center justify-between px-6 py-4 text-left"
-              onClick={() => setShowOptional(!showOptional)}
-            >
-              <h3 className="text-sm font-medium">Parameters & Examples</h3>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className={`text-muted-foreground transition-transform ${showOptional ? "rotate-180" : ""}`}
-              >
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
-            </button>
-            {showOptional && (
-              <div className="space-y-5 border-t p-6">
-                <div className="space-y-2">
-                  <Label htmlFor="parameters">Parameters (JSON)</Label>
-                  <Textarea
-                    id="parameters"
-                    value={parameters}
-                    onChange={(e) => setParameters(e.target.value)}
-                    placeholder='[{"name": "language", "description": "Target language"}]'
-                    rows={3}
-                    className="font-mono text-sm"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="examples">Usage Examples (JSON)</Label>
-                  <Textarea
-                    id="examples"
-                    value={examples}
-                    onChange={(e) => setExamples(e.target.value)}
-                    placeholder='[{"input": "Build a card", "output": "..."}]'
-                    rows={3}
-                    className="font-mono text-sm"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Sidebar */}

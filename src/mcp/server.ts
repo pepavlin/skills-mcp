@@ -77,7 +77,7 @@ export function createMcpServer(): McpServer {
   // Tool: get_skill - retrieve full skill content
   server.tool(
     "get_skill",
-    "Get the complete content of a specific AI skill by its name, slug, or ID. Returns the full skill including instructions, parameters, and examples. Use this after finding a skill via search_skills or list_skills.",
+    "Get the complete content of a specific AI skill by its name, slug, or ID. Returns the full skill including instructions. Use this after finding a skill via search_skills or list_skills.",
     {
       identifier: z
         .string()
@@ -113,21 +113,6 @@ export function createMcpServer(): McpServer {
         content: skill.content,
         tags: skill.tags.map((t) => t.name),
       };
-
-      if (skill.parameters) {
-        try {
-          output.parameters = JSON.parse(skill.parameters);
-        } catch {
-          output.parameters = skill.parameters;
-        }
-      }
-      if (skill.examples) {
-        try {
-          output.examples = JSON.parse(skill.examples);
-        } catch {
-          output.examples = skill.examples;
-        }
-      }
 
       return {
         content: [

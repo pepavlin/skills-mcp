@@ -9,8 +9,6 @@ export const skills = sqliteTable("skills", {
   type: text("type", {
     enum: ["prompt", "workflow", "technique", "snippet", "config"],
   }).notNull(),
-  parameters: text("parameters"), // JSON string of parameter definitions
-  examples: text("examples"), // JSON string of usage examples
   tokenEstimate: integer("token_estimate"),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
