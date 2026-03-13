@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 
 interface Stats {
   totalSkills: number;
@@ -21,12 +19,12 @@ interface Stats {
   }>;
 }
 
-const typeConfig: Record<string, { label: string; color: string; bg: string }> = {
-  prompt: { label: "Prompt", color: "text-blue-700", bg: "bg-blue-50 border-blue-100" },
-  workflow: { label: "Workflow", color: "text-violet-700", bg: "bg-violet-50 border-violet-100" },
-  technique: { label: "Technique", color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-100" },
-  snippet: { label: "Snippet", color: "text-amber-700", bg: "bg-amber-50 border-amber-100" },
-  config: { label: "Config", color: "text-zinc-700", bg: "bg-zinc-50 border-zinc-200" },
+const typeLabels: Record<string, string> = {
+  prompt: "Prompt",
+  workflow: "Workflow",
+  technique: "Technique",
+  snippet: "Snippet",
+  config: "Config",
 };
 
 export default function DashboardPage() {
@@ -60,203 +58,148 @@ export default function DashboardPage() {
 
   if (!stats) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900" />
+      <div className="flex h-40 items-center justify-center">
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-5">
+      {/* Stats row */}
+      <div className="flex items-center gap-6 text-sm">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Your AI skills at a glance
-          </p>
+          <span className="text-2xl font-semibold tabular-nums">{stats.totalSkills}</span>
+          <span className="ml-1.5 text-zinc-500">skills</span>
         </div>
-        <Link href="/dashboard/skills/new">
-          <Button className="gap-2">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            New Skill
-          </Button>
+        <div className="h-4 w-px bg-zinc-200" />
+        <div>
+          <span className="text-2xl font-semibold tabular-nums">{stats.totalTags}</span>
+          <span className="ml-1.5 text-zinc-500">tags</span>
+        </div>
+        <div className="h-4 w-px bg-zinc-200" />
+        {Object.entries(stats.byType).map(([type, count]) => (
+          <div key={type} className="text-zinc-500">
+            <span className="font-medium tabular-nums text-zinc-700">{count}</span>{" "}
+            {typeLabels[type]?.toLowerCase() || type}
+          </div>
+        ))}
+        <div className="flex-1" />
+        <Link
+          href="/dashboard/skills/new"
+          className="rounded bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-800"
+        >
+          + New Skill
         </Link>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl border bg-white p-5">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Skills</p>
-          <p className="mt-2 text-3xl font-semibold tabular-nums">{stats.totalSkills}</p>
+      {/* Recent skills table */}
+      <div className="rounded-lg border bg-white">
+        <div className="flex items-center justify-between border-b px-4 py-2.5">
+          <h2 className="text-xs font-medium uppercase tracking-wide text-zinc-500">Recent Skills</h2>
+          <Link href="/dashboard/skills" className="text-xs text-zinc-400 hover:text-zinc-700">
+            View all
+          </Link>
         </div>
-        <div className="rounded-xl border bg-white p-5">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Tags</p>
-          <p className="mt-2 text-3xl font-semibold tabular-nums">{stats.totalTags}</p>
-        </div>
-        {Object.entries(stats.byType).slice(0, 2).map(([type, count]) => (
-          <div key={type} className="rounded-xl border bg-white p-5">
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              {typeConfig[type]?.label || type}s
-            </p>
-            <p className="mt-2 text-3xl font-semibold tabular-nums">{count}</p>
+        {stats.recentSkills.length === 0 ? (
+          <div className="px-4 py-8 text-center text-sm text-zinc-400">
+            No skills yet.{" "}
+            <Link href="/dashboard/skills/new" className="text-zinc-700 underline">
+              Create one
+            </Link>
           </div>
-        ))}
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-5">
-        {/* Recent skills */}
-        <div className="lg:col-span-3">
-          <div className="rounded-xl border bg-white">
-            <div className="flex items-center justify-between border-b px-6 py-4">
-              <h2 className="font-semibold">Recent Skills</h2>
-              <Link href="/dashboard/skills" className="text-sm text-muted-foreground hover:text-foreground">
-                View all
-              </Link>
-            </div>
-            {stats.recentSkills.length === 0 ? (
-              <div className="px-6 py-12 text-center">
-                <p className="text-sm text-muted-foreground">No skills yet.</p>
-                <Link href="/dashboard/skills/new">
-                  <Button variant="outline" size="sm" className="mt-3">
-                    Create your first skill
-                  </Button>
-                </Link>
-              </div>
-            ) : (
-              <div className="divide-y">
-                {stats.recentSkills.map((skill) => (
-                  <Link
-                    key={skill.id}
-                    href={`/dashboard/skills/${skill.id}`}
-                    className="flex items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-zinc-50"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2.5">
-                        <span className="font-medium">{skill.name}</span>
-                        <span className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${typeConfig[skill.type]?.bg || ""} ${typeConfig[skill.type]?.color || ""}`}>
-                          {typeConfig[skill.type]?.label || skill.type}
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b text-left text-xs text-zinc-400">
+                <th className="px-4 py-2 font-medium">Name</th>
+                <th className="px-4 py-2 font-medium">Type</th>
+                <th className="px-4 py-2 font-medium">Tags</th>
+                <th className="px-4 py-2 font-medium text-right">Tokens</th>
+                <th className="px-4 py-2 font-medium text-right">Updated</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {stats.recentSkills.map((skill) => (
+                <tr key={skill.id} className="hover:bg-zinc-50">
+                  <td className="px-4 py-2.5">
+                    <Link
+                      href={`/dashboard/skills/${skill.id}`}
+                      className="font-medium text-zinc-900 hover:underline"
+                    >
+                      {skill.name}
+                    </Link>
+                    <p className="mt-0.5 line-clamp-1 text-xs text-zinc-400">
+                      {skill.description}
+                    </p>
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-600">
+                      {typeLabels[skill.type] || skill.type}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <div className="flex gap-1">
+                      {skill.tags.map((tag) => (
+                        <span
+                          key={tag.id}
+                          className="rounded px-1.5 py-0.5 text-[11px]"
+                          style={{ backgroundColor: tag.color + "18", color: tag.color }}
+                        >
+                          {tag.name}
                         </span>
-                      </div>
-                      <p className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">
-                        {skill.description}
-                      </p>
-                      {skill.tags.length > 0 && (
-                        <div className="mt-1.5 flex gap-1">
-                          {skill.tags.map((tag) => (
-                            <Badge
-                              key={tag.id}
-                              variant="outline"
-                              className="h-5 text-[10px] font-normal"
-                              style={{ borderColor: tag.color, color: tag.color }}
-                            >
-                              {tag.name}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
+                      ))}
                     </div>
-                    <div className="text-right">
-                      {skill.tokenEstimate && (
-                        <p className="text-xs tabular-nums text-muted-foreground">
-                          ~{skill.tokenEstimate} tok
-                        </p>
-                      )}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Type breakdown */}
-        <div className="lg:col-span-2">
-          <div className="rounded-xl border bg-white">
-            <div className="border-b px-6 py-4">
-              <h2 className="font-semibold">By Type</h2>
-            </div>
-            <div className="p-6">
-              {Object.keys(stats.byType).length === 0 ? (
-                <p className="text-sm text-muted-foreground">No skills yet</p>
-              ) : (
-                <div className="space-y-3">
-                  {Object.entries(stats.byType).map(([type, count]) => {
-                    const pct = stats.totalSkills > 0 ? (count / stats.totalSkills) * 100 : 0;
-                    const cfg = typeConfig[type];
-                    return (
-                      <div key={type}>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className={`font-medium ${cfg?.color || ""}`}>
-                            {cfg?.label || type}
-                          </span>
-                          <span className="tabular-nums text-muted-foreground">{count}</span>
-                        </div>
-                        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-zinc-100">
-                          <div
-                            className="h-full rounded-full bg-zinc-900 transition-all"
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+                  </td>
+                  <td className="px-4 py-2.5 text-right tabular-nums text-zinc-500">
+                    {skill.tokenEstimate ? `~${skill.tokenEstimate}` : "—"}
+                  </td>
+                  <td className="px-4 py-2.5 text-right text-xs text-zinc-400">
+                    {new Date(skill.updatedAt).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
-      {/* MCP Setup */}
-      <div className="rounded-xl border bg-white">
-        <div className="border-b px-6 py-4">
-          <h2 className="font-semibold">Connect via MCP</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Add this MCP server to your AI assistant to access your skills
-          </p>
+      {/* MCP config */}
+      <div className="rounded-lg border bg-white">
+        <div className="flex items-center justify-between border-b px-4 py-2.5">
+          <h2 className="text-xs font-medium uppercase tracking-wide text-zinc-500">MCP Configuration</h2>
+          <button
+            onClick={copyConfig}
+            className="rounded border px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50"
+          >
+            {copied ? "Copied" : "Copy"}
+          </button>
         </div>
-        <div className="p-6">
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Config */}
-            <div>
-              <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-sm font-medium">Configuration</h3>
-                <Button variant="outline" size="sm" onClick={copyConfig} className="h-7 text-xs">
-                  {copied ? "Copied!" : "Copy"}
-                </Button>
-              </div>
-              <p className="mb-3 text-xs text-muted-foreground">
-                Add to <code className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono">~/.claude.json</code> or project <code className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono">.mcp.json</code>
-              </p>
-              <pre className="overflow-x-auto rounded-lg bg-zinc-950 p-4 font-mono text-sm text-zinc-300">
-                {mcpConfig}
-              </pre>
-            </div>
-
-            {/* Tools reference */}
-            <div>
-              <h3 className="mb-3 text-sm font-medium">Available Tools</h3>
-              <div className="space-y-2.5">
-                {[
-                  { name: "search_skills", params: "query, tags?, type?", desc: "Find skills by keyword and filters" },
-                  { name: "get_skill", params: "identifier", desc: "Get full content of a specific skill" },
-                  { name: "list_skills", params: "type?, tags?, limit?", desc: "Browse all available skills" },
-                  { name: "list_tags", params: "", desc: "List all tags with skill counts" },
-                ].map((tool) => (
-                  <div key={tool.name} className="rounded-lg border border-zinc-100 bg-zinc-50/50 px-4 py-3">
-                    <div className="flex items-baseline gap-2">
-                      <code className="text-sm font-semibold">{tool.name}</code>
-                      {tool.params && (
-                        <span className="text-xs text-muted-foreground">({tool.params})</span>
-                      )}
-                    </div>
-                    <p className="mt-0.5 text-xs text-muted-foreground">{tool.desc}</p>
-                  </div>
-                ))}
-              </div>
+        <div className="grid gap-4 p-4 lg:grid-cols-2">
+          <div>
+            <p className="mb-2 text-xs text-zinc-400">
+              Add to <code className="rounded bg-zinc-100 px-1 font-mono text-[11px]">~/.claude.json</code> or{" "}
+              <code className="rounded bg-zinc-100 px-1 font-mono text-[11px]">.mcp.json</code>
+            </p>
+            <pre className="overflow-x-auto rounded bg-zinc-900 p-3 font-mono text-xs leading-relaxed text-zinc-300">
+              {mcpConfig}
+            </pre>
+          </div>
+          <div>
+            <p className="mb-2 text-xs text-zinc-400">Available tools</p>
+            <div className="space-y-1 text-xs">
+              {[
+                { name: "search_skills", args: "query, tags?, type?", desc: "Find skills by keyword" },
+                { name: "get_skill", args: "identifier", desc: "Get full skill content" },
+                { name: "list_skills", args: "type?, tags?, limit?", desc: "Browse available skills" },
+                { name: "list_tags", args: "", desc: "List tags with counts" },
+              ].map((tool) => (
+                <div key={tool.name} className="flex items-baseline gap-2 rounded bg-zinc-50 px-3 py-2">
+                  <code className="font-mono font-medium text-zinc-800">{tool.name}</code>
+                  {tool.args && <span className="text-zinc-400">({tool.args})</span>}
+                  <span className="ml-auto text-zinc-400">{tool.desc}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>

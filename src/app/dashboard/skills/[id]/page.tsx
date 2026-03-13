@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { SkillForm } from "@/components/skill-form";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
@@ -22,12 +20,12 @@ interface SkillData {
   tags: Array<{ id: string; name: string; color: string }>;
 }
 
-const typeConfig: Record<string, { label: string; color: string; bg: string }> = {
-  prompt: { label: "Prompt", color: "text-blue-700", bg: "bg-blue-50 border-blue-100" },
-  workflow: { label: "Workflow", color: "text-violet-700", bg: "bg-violet-50 border-violet-100" },
-  technique: { label: "Technique", color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-100" },
-  snippet: { label: "Snippet", color: "text-amber-700", bg: "bg-amber-50 border-amber-100" },
-  config: { label: "Config", color: "text-zinc-700", bg: "bg-zinc-50 border-zinc-200" },
+const typeLabels: Record<string, string> = {
+  prompt: "Prompt",
+  workflow: "Workflow",
+  technique: "Technique",
+  snippet: "Snippet",
+  config: "Config",
 };
 
 export default function SkillDetailPage() {
@@ -75,98 +73,80 @@ export default function SkillDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex h-40 items-center justify-center">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900" />
+      <div className="flex h-32 items-center justify-center">
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900" />
       </div>
     );
   }
 
   if (!skill) return null;
 
-  const cfg = typeConfig[skill.type];
-
   return (
-    <div className="space-y-6">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link href="/dashboard/skills" className="hover:text-foreground">Skills</Link>
-        <span>/</span>
-        <span className="text-foreground">{skill.name}</span>
-      </div>
-
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">{skill.name}</h1>
-            <span className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${cfg?.bg || ""} ${cfg?.color || ""}`}>
-              {cfg?.label || skill.type}
-            </span>
-          </div>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            {skill.description}
-          </p>
-          {skill.tags.length > 0 && (
-            <div className="mt-3 flex gap-1.5">
-              {skill.tags.map((tag) => (
-                <Badge
-                  key={tag.id}
-                  variant="outline"
-                  className="font-normal"
-                  style={{ borderColor: tag.color, color: tag.color }}
-                >
-                  {tag.name}
-                </Badge>
-              ))}
-            </div>
-          )}
+    <div className="space-y-4">
+      {/* Breadcrumb + actions */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5 text-xs text-zinc-400">
+          <Link href="/dashboard/skills" className="hover:text-zinc-700">Skills</Link>
+          <span>/</span>
+          <span className="text-zinc-700">{skill.name}</span>
         </div>
-        <div className="flex shrink-0 gap-2">
-          <Button variant="outline" size="sm" onClick={copySkillMd}>
-            Export SKILL.md
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
+        <div className="flex items-center gap-2">
+          <button
+            onClick={copySkillMd}
+            className="rounded border px-2.5 py-1 text-xs text-zinc-500 hover:bg-zinc-50"
+          >
+            Export .md
+          </button>
+          <button
             onClick={handleDelete}
             disabled={deleting}
-            className="text-destructive hover:bg-destructive/5 hover:text-destructive"
+            className="rounded border border-red-200 px-2.5 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50"
           >
             {deleting ? "Deleting..." : "Delete"}
-          </Button>
+          </button>
         </div>
       </div>
 
-      {/* Meta */}
-      <div className="flex items-center gap-6 text-xs text-muted-foreground">
-        <span className="font-mono">{skill.slug}</span>
-        <span className="tabular-nums">~{skill.tokenEstimate} tokens</span>
-        <span>Updated {new Date(skill.updatedAt).toLocaleDateString()}</span>
+      {/* Meta row */}
+      <div className="flex items-center gap-3 text-xs">
+        <span className="text-lg font-semibold text-zinc-900">{skill.name}</span>
+        <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-zinc-600">
+          {typeLabels[skill.type] || skill.type}
+        </span>
+        {skill.tags.map((tag) => (
+          <span
+            key={tag.id}
+            className="rounded px-1.5 py-0.5"
+            style={{ backgroundColor: tag.color + "18", color: tag.color }}
+          >
+            {tag.name}
+          </span>
+        ))}
+        <div className="flex-1" />
+        <span className="font-mono text-zinc-400">{skill.slug}</span>
+        <span className="tabular-nums text-zinc-400">~{skill.tokenEstimate} tok</span>
+        <span className="text-zinc-400">{new Date(skill.updatedAt).toLocaleDateString()}</span>
       </div>
+
+      <p className="max-w-2xl text-xs leading-relaxed text-zinc-500">{skill.description}</p>
 
       {/* Tabs */}
       <Tabs defaultValue="view">
-        <TabsList>
-          <TabsTrigger value="view">View</TabsTrigger>
-          <TabsTrigger value="edit">Edit</TabsTrigger>
-          <TabsTrigger value="skillmd">SKILL.md</TabsTrigger>
+        <TabsList className="h-8">
+          <TabsTrigger value="view" className="text-xs">View</TabsTrigger>
+          <TabsTrigger value="edit" className="text-xs">Edit</TabsTrigger>
+          <TabsTrigger value="skillmd" className="text-xs">SKILL.md</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="view" className="mt-6 space-y-4">
-          <div className="rounded-xl border bg-white">
-            <div className="border-b px-6 py-4">
-              <h3 className="text-sm font-medium">Content</h3>
-            </div>
-            <div className="p-6">
-              <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-zinc-700">
-                {skill.content}
-              </pre>
-            </div>
+        <TabsContent value="view" className="mt-3">
+          <div className="rounded-lg border bg-white">
+            <pre className="whitespace-pre-wrap p-4 font-mono text-xs leading-relaxed text-zinc-700">
+              {skill.content}
+            </pre>
           </div>
-
         </TabsContent>
 
-        <TabsContent value="edit" className="mt-6">
+        <TabsContent value="edit" className="mt-3">
           <SkillForm
             mode="edit"
             initialData={{
@@ -180,19 +160,20 @@ export default function SkillDetailPage() {
           />
         </TabsContent>
 
-        <TabsContent value="skillmd" className="mt-6">
-          <div className="rounded-xl border bg-white">
-            <div className="flex items-center justify-between border-b px-6 py-4">
-              <h3 className="text-sm font-medium">Agent Skills Format</h3>
-              <Button variant="outline" size="sm" onClick={copySkillMd}>
+        <TabsContent value="skillmd" className="mt-3">
+          <div className="rounded-lg border bg-white">
+            <div className="flex items-center justify-between border-b px-4 py-2">
+              <span className="text-xs text-zinc-400">Agent Skills Format</span>
+              <button
+                onClick={copySkillMd}
+                className="rounded border px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50"
+              >
                 Copy
-              </Button>
+              </button>
             </div>
-            <div className="p-6">
-              <pre className="whitespace-pre-wrap rounded-lg bg-zinc-950 p-4 font-mono text-sm text-zinc-300">
-                {generateSkillMd()}
-              </pre>
-            </div>
+            <pre className="whitespace-pre-wrap rounded-b-lg bg-zinc-900 p-4 font-mono text-xs text-zinc-300">
+              {generateSkillMd()}
+            </pre>
           </div>
         </TabsContent>
       </Tabs>

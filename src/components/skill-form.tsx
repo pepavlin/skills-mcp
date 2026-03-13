@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -112,29 +111,27 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Main content */}
-        <div className="space-y-6 lg:col-span-2">
-          <div className="rounded-xl border bg-white">
-            <div className="border-b px-6 py-4">
-              <h3 className="text-sm font-medium">Details</h3>
-            </div>
-            <div className="space-y-5 p-6">
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid gap-4 lg:grid-cols-3">
+        {/* Main fields */}
+        <div className="space-y-4 lg:col-span-2">
+          <div className="rounded-lg border bg-white p-4">
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <Label htmlFor="name" className="text-xs">Name</Label>
                 <Input
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. React Component Builder"
+                  className="h-8 text-sm"
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="description">Description</Label>
-                  <span className="text-xs tabular-nums text-muted-foreground">
+                  <Label htmlFor="description" className="text-xs">Description</Label>
+                  <span className="text-[10px] tabular-nums text-zinc-400">
                     {description.length} chars
                   </span>
                 </div>
@@ -142,20 +139,21 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="What this skill does and when to use it. Most important field for MCP discoverability."
-                  rows={3}
+                  placeholder="What this skill does. Important for MCP discoverability."
+                  rows={2}
+                  className="text-sm"
                 />
                 {description.length > 0 && description.length < 20 && (
-                  <p className="text-xs text-destructive">
-                    Too short for effective MCP discovery (min 20 chars)
+                  <p className="text-[10px] text-red-500">
+                    Too short for MCP discovery (min 20 chars)
                   </p>
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="content">Content</Label>
-                  <span className={`text-xs tabular-nums ${tokenEstimate > 5000 ? "text-destructive" : tokenEstimate > 3000 ? "text-amber-600" : "text-muted-foreground"}`}>
+                  <Label htmlFor="content" className="text-xs">Content</Label>
+                  <span className={`text-[10px] tabular-nums ${tokenEstimate > 5000 ? "text-red-500" : tokenEstimate > 3000 ? "text-amber-500" : "text-zinc-400"}`}>
                     ~{tokenEstimate} tokens
                   </span>
                 </div>
@@ -163,105 +161,85 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
                   id="content"
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  placeholder="The full skill content &#8212; instructions, prompt template, workflow steps, etc."
-                  rows={16}
-                  className="font-mono text-sm"
+                  placeholder="Full skill content — instructions, prompt template, workflow steps, etc."
+                  rows={14}
+                  className="font-mono text-xs"
                 />
-                {tokenEstimate > 5000 && (
-                  <p className="text-xs text-amber-600">
-                    Exceeds 5000 tokens. Consider splitting into smaller skills.
-                  </p>
-                )}
               </div>
             </div>
           </div>
-
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
-          <div className="rounded-xl border bg-white">
-            <div className="border-b px-6 py-4">
-              <h3 className="text-sm font-medium">Type</h3>
-            </div>
-            <div className="p-6">
-              <Select value={type} onValueChange={(v) => setType(v ?? "prompt")}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="prompt">Prompt</SelectItem>
-                  <SelectItem value="workflow">Workflow</SelectItem>
-                  <SelectItem value="technique">Technique</SelectItem>
-                  <SelectItem value="snippet">Snippet</SelectItem>
-                  <SelectItem value="config">Config</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        <div className="space-y-4">
+          <div className="rounded-lg border bg-white p-4">
+            <Label className="text-xs">Type</Label>
+            <Select value={type} onValueChange={(v) => setType(v ?? "prompt")}>
+              <SelectTrigger className="mt-1 h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="prompt">Prompt</SelectItem>
+                <SelectItem value="workflow">Workflow</SelectItem>
+                <SelectItem value="technique">Technique</SelectItem>
+                <SelectItem value="snippet">Snippet</SelectItem>
+                <SelectItem value="config">Config</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="rounded-xl border bg-white">
-            <div className="border-b px-6 py-4">
-              <h3 className="text-sm font-medium">Tags</h3>
-            </div>
-            <div className="p-6">
-              {availableTags.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  No tags yet. Create some in Tags.
-                </p>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {availableTags.map((tag) => {
-                    const selected = selectedTagIds.includes(tag.id);
-                    return (
-                      <Badge
-                        key={tag.id}
-                        variant={selected ? "default" : "outline"}
-                        className="cursor-pointer transition-colors"
-                        style={
-                          selected
-                            ? { backgroundColor: tag.color, borderColor: tag.color, color: "white" }
-                            : { borderColor: tag.color, color: tag.color }
-                        }
-                        onClick={() => toggleTag(tag.id)}
-                      >
-                        {tag.name}
-                      </Badge>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+          <div className="rounded-lg border bg-white p-4">
+            <Label className="text-xs">Tags</Label>
+            {availableTags.length === 0 ? (
+              <p className="mt-1 text-xs text-zinc-400">No tags yet.</p>
+            ) : (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {availableTags.map((tag) => {
+                  const selected = selectedTagIds.includes(tag.id);
+                  return (
+                    <button
+                      key={tag.id}
+                      type="button"
+                      className={`rounded px-2 py-0.5 text-xs transition-colors ${
+                        selected ? "text-white" : ""
+                      }`}
+                      style={
+                        selected
+                          ? { backgroundColor: tag.color, color: "white" }
+                          : { backgroundColor: tag.color + "18", color: tag.color }
+                      }
+                      onClick={() => toggleTag(tag.id)}
+                    >
+                      {tag.name}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          <div className="rounded-xl border bg-white">
-            <div className="border-b px-6 py-4">
-              <h3 className="text-sm font-medium">Token Budget</h3>
+          <div className="rounded-lg border bg-white p-4">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-zinc-400">Token budget</span>
+              <span className={`font-mono tabular-nums ${tokenEstimate > 5000 ? "text-red-500" : tokenEstimate > 3000 ? "text-amber-500" : "text-zinc-600"}`}>
+                {tokenEstimate} / 5000
+              </span>
             </div>
-            <div className="space-y-3 p-6 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Estimated</span>
-                <span className="font-mono tabular-nums">{tokenEstimate}</span>
-              </div>
-              <div className="h-1.5 overflow-hidden rounded-full bg-zinc-100">
-                <div
-                  className={`h-full rounded-full transition-all ${
-                    tokenEstimate > 5000 ? "bg-red-500" : tokenEstimate > 3000 ? "bg-amber-500" : "bg-emerald-500"
-                  }`}
-                  style={{ width: `${Math.min((tokenEstimate / 5000) * 100, 100)}%` }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {tokenEstimate > 5000 ? "Over budget" : tokenEstimate > 3000 ? "Near limit" : "Within budget"} (target: &lt;5000)
-              </p>
+            <div className="mt-2 h-1 overflow-hidden rounded-full bg-zinc-100">
+              <div
+                className={`h-full rounded-full transition-all ${
+                  tokenEstimate > 5000 ? "bg-red-500" : tokenEstimate > 3000 ? "bg-amber-500" : "bg-emerald-500"
+                }`}
+                style={{ width: `${Math.min((tokenEstimate / 5000) * 100, 100)}%` }}
+              />
             </div>
           </div>
 
           <div className="flex gap-2">
-            <Button type="submit" className="flex-1" disabled={saving}>
-              {saving ? "Saving..." : mode === "edit" ? "Update Skill" : "Create Skill"}
+            <Button type="submit" size="sm" className="flex-1 text-xs" disabled={saving}>
+              {saving ? "Saving..." : mode === "edit" ? "Update" : "Create"}
             </Button>
-            <Button type="button" variant="outline" onClick={() => router.back()}>
+            <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => router.back()}>
               Cancel
             </Button>
           </div>

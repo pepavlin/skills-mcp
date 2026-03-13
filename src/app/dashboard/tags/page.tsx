@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 interface TagWithCount {
@@ -92,115 +91,138 @@ export default function TagsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Tags</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Organize your skills with tags
-        </p>
-      </div>
+    <div className="space-y-4">
+      <h1 className="text-sm font-medium text-zinc-500">
+        Tags <span className="tabular-nums text-zinc-400">({tags.length})</span>
+      </h1>
 
-      {/* Create tag */}
-      <div className="rounded-xl border bg-white">
-        <div className="border-b px-6 py-4">
-          <h2 className="text-sm font-medium">New Tag</h2>
-        </div>
-        <div className="p-6">
-          <form onSubmit={handleCreate} className="flex items-center gap-4">
-            <Input
-              placeholder="Tag name"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              className="max-w-xs"
+      {/* Create tag - inline */}
+      <form onSubmit={handleCreate} className="flex items-center gap-3 rounded-lg border bg-white px-4 py-3">
+        <Input
+          placeholder="New tag name"
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          className="h-8 max-w-[200px] text-xs"
+        />
+        <div className="flex gap-1">
+          {PRESET_COLORS.map((c) => (
+            <button
+              key={c}
+              type="button"
+              className={`h-5 w-5 rounded-full border-2 transition-all ${
+                newColor === c ? "scale-110 border-zinc-900" : "border-transparent"
+              }`}
+              style={{ backgroundColor: c }}
+              onClick={() => setNewColor(c)}
             />
-            <div className="flex gap-1.5">
-              {PRESET_COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  className={`h-7 w-7 rounded-full border-2 transition-all ${
-                    newColor === c ? "scale-110 border-zinc-900" : "border-transparent"
-                  }`}
-                  style={{ backgroundColor: c }}
-                  onClick={() => setNewColor(c)}
-                />
-              ))}
-            </div>
-            <Button type="submit" size="sm">Create</Button>
-          </form>
+          ))}
         </div>
-      </div>
+        <Button type="submit" size="sm" className="h-7 text-xs">
+          Create
+        </Button>
+      </form>
 
-      {/* Tags list */}
-      <div className="rounded-xl border bg-white">
-        <div className="border-b px-6 py-4">
-          <h2 className="text-sm font-medium">All Tags ({tags.length})</h2>
+      {/* Tags table */}
+      {tags.length === 0 ? (
+        <div className="rounded-lg border bg-white py-8 text-center text-sm text-zinc-400">
+          No tags yet.
         </div>
-        {tags.length === 0 ? (
-          <div className="px-6 py-12 text-center">
-            <p className="text-sm text-muted-foreground">No tags yet. Create one above.</p>
-          </div>
-        ) : (
-          <div className="divide-y">
-            {tags.map((tag) => (
-              <div key={tag.id} className="flex items-center justify-between px-6 py-3.5">
-                {editingId === tag.id ? (
-                  <div className="flex flex-1 items-center gap-3">
-                    <Input
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      className="w-44"
-                    />
-                    <div className="flex gap-1">
-                      {PRESET_COLORS.map((c) => (
-                        <button
-                          key={c}
-                          type="button"
-                          className={`h-6 w-6 rounded-full border-2 transition-all ${
-                            editColor === c ? "scale-110 border-zinc-900" : "border-transparent"
-                          }`}
-                          style={{ backgroundColor: c }}
-                          onClick={() => setEditColor(c)}
+      ) : (
+        <div className="overflow-hidden rounded-lg border bg-white">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b text-left text-xs text-zinc-400">
+                <th className="px-4 py-2 font-medium">Name</th>
+                <th className="px-4 py-2 font-medium">Color</th>
+                <th className="px-4 py-2 font-medium text-right">Skills</th>
+                <th className="px-4 py-2 font-medium text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {tags.map((tag) => (
+                <tr key={tag.id} className="hover:bg-zinc-50">
+                  {editingId === tag.id ? (
+                    <>
+                      <td className="px-4 py-2">
+                        <Input
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          className="h-7 w-40 text-xs"
                         />
-                      ))}
-                    </div>
-                    <Button size="sm" onClick={() => handleUpdate(tag.id)}>Save</Button>
-                    <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>Cancel</Button>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex items-center gap-3">
-                      <Badge
-                        className="font-normal"
-                        style={{ backgroundColor: tag.color, color: "white", border: "none" }}
-                      >
-                        {tag.name}
-                      </Badge>
-                      <span className="text-sm text-muted-foreground">
-                        {tag.skillCount} skill{tag.skillCount !== 1 ? "s" : ""}
-                      </span>
-                    </div>
-                    <div className="flex gap-1">
-                      <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => startEdit(tag)}>
-                        Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-8 text-xs text-destructive hover:text-destructive"
-                        onClick={() => handleDelete(tag.id, tag.name)}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+                      </td>
+                      <td className="px-4 py-2">
+                        <div className="flex gap-1">
+                          {PRESET_COLORS.map((c) => (
+                            <button
+                              key={c}
+                              type="button"
+                              className={`h-4 w-4 rounded-full border-2 ${
+                                editColor === c ? "border-zinc-900" : "border-transparent"
+                              }`}
+                              style={{ backgroundColor: c }}
+                              onClick={() => setEditColor(c)}
+                            />
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-4 py-2 text-right tabular-nums text-zinc-500">
+                        {tag.skillCount}
+                      </td>
+                      <td className="px-4 py-2 text-right">
+                        <button
+                          onClick={() => handleUpdate(tag.id)}
+                          className="text-xs text-zinc-700 hover:underline"
+                        >
+                          Save
+                        </button>
+                        <span className="mx-1.5 text-zinc-200">|</span>
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="text-xs text-zinc-400 hover:text-zinc-600"
+                        >
+                          Cancel
+                        </button>
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="px-4 py-2">
+                        <span
+                          className="rounded px-1.5 py-0.5 text-xs font-medium text-white"
+                          style={{ backgroundColor: tag.color }}
+                        >
+                          {tag.name}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2">
+                        <span className="font-mono text-xs text-zinc-400">{tag.color}</span>
+                      </td>
+                      <td className="px-4 py-2 text-right tabular-nums text-zinc-500">
+                        {tag.skillCount}
+                      </td>
+                      <td className="px-4 py-2 text-right">
+                        <button
+                          onClick={() => startEdit(tag)}
+                          className="text-xs text-zinc-500 hover:text-zinc-700"
+                        >
+                          Edit
+                        </button>
+                        <span className="mx-1.5 text-zinc-200">|</span>
+                        <button
+                          onClick={() => handleDelete(tag.id, tag.name)}
+                          className="text-xs text-red-500 hover:text-red-700"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
