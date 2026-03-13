@@ -41,7 +41,7 @@ export default function DashboardPage() {
     {
       mcpServers: {
         "ai-skills": {
-          type: "url",
+          type: "http",
           url: "https://ai-skills.pavlin.dev/api/mcp",
         },
       },
