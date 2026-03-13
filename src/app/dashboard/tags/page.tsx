@@ -127,14 +127,14 @@ export default function TagsPage() {
                   }`}
                   style={{
                     backgroundColor: c,
-                    ringColor: c,
-                  }}
+                    "--tw-ring-color": c,
+                  } as React.CSSProperties}
                   onClick={() => setNewColor(c)}
                 />
               ))}
               <div
                 className="ml-1 h-5 w-5 rounded-full ring-2 ring-offset-1 ring-offset-background"
-                style={{ backgroundColor: newColor, ringColor: newColor }}
+                style={{ backgroundColor: newColor, "--tw-ring-color": newColor } as React.CSSProperties}
               />
             </div>
           </div>
