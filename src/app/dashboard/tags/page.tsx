@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { TagIcon, PlusIcon, PencilIcon, Trash2Icon, CheckIcon, XIcon } from "lucide-react";
 
 interface TagWithCount {
   id: string;
@@ -92,105 +91,106 @@ export default function TagsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Page header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Tags</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {tags.length} {tags.length === 1 ? "tag" : "tags"} total
+        <h1 className="text-xl font-semibold text-foreground">Tags</h1>
+        <p className="mt-0.5 text-sm text-muted-foreground">
+          {tags.length} tag{tags.length !== 1 ? "s" : ""} total
         </p>
       </div>
 
       {/* Create tag card */}
-      <div className="rounded-xl border border-border bg-card shadow-sm p-6">
-        <h2 className="text-sm font-semibold mb-4 flex items-center gap-2">
-          <PlusIcon className="h-4 w-4 text-primary" />
-          Create Tag
-        </h2>
+      <div className="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+        <h2 className="mb-4 text-sm font-semibold text-foreground">Create New Tag</h2>
         <form onSubmit={handleCreate} className="flex flex-wrap items-end gap-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Tag name</label>
+            <label className="text-xs font-medium text-muted-foreground">Name</label>
             <Input
-              placeholder="e.g. react, backend, prompting"
+              placeholder="Tag name..."
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              className="h-9 w-52"
+              className="h-9 w-48 text-sm bg-background"
             />
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">Color</label>
-            <div className="flex items-center gap-1.5 h-9">
+            <div className="flex items-center gap-1.5 rounded-lg border border-border/60 bg-background px-2.5 py-1.5">
               {PRESET_COLORS.map((c) => (
                 <button
                   key={c}
                   type="button"
-                  className={`h-6 w-6 rounded-full transition-all hover:scale-110 ${
-                    newColor === c ? "ring-2 ring-offset-2 ring-foreground/30 scale-110" : ""
+                  className={`h-5 w-5 rounded-full transition-all ${
+                    newColor === c
+                      ? "scale-125 ring-2 ring-offset-1 ring-offset-background"
+                      : "opacity-70 hover:opacity-100 hover:scale-110"
                   }`}
-                  style={{ backgroundColor: c }}
+                  style={{
+                    backgroundColor: c,
+                    ringColor: c,
+                  }}
                   onClick={() => setNewColor(c)}
-                  title={c}
                 />
               ))}
+              <div
+                className="ml-1 h-5 w-5 rounded-full ring-2 ring-offset-1 ring-offset-background"
+                style={{ backgroundColor: newColor, ringColor: newColor }}
+              />
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div
-              className="flex h-9 items-center rounded-full px-3 text-xs font-medium text-white shadow-sm"
-              style={{ backgroundColor: newColor }}
-            >
-              {newName || "preview"}
-            </div>
-            <Button type="submit" size="sm" className="h-9 px-4">
-              Create tag
-            </Button>
-          </div>
+          <Button type="submit" className="h-9 px-4 text-sm">
+            Create Tag
+          </Button>
         </form>
       </div>
 
       {/* Tags table */}
       {tags.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-card py-16 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-muted">
-            <TagIcon className="h-7 w-7 text-muted-foreground" />
+        <div className="flex flex-col items-center gap-4 rounded-xl border border-border/60 bg-card py-16 text-center shadow-sm">
+          <div className="rounded-full bg-primary/10 p-4">
+            <svg className="h-7 w-7 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+              <line x1="7" y1="7" x2="7.01" y2="7"/>
+            </svg>
           </div>
-          <p className="mt-4 text-base font-semibold">No tags yet</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Create your first tag to organize your skills.
-          </p>
+          <div>
+            <p className="text-sm font-medium text-foreground">No tags yet</p>
+            <p className="mt-1 text-xs text-muted-foreground">Create your first tag above</p>
+          </div>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-          <table className="w-full">
+        <div className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
+          <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border bg-muted/30 text-left">
-                <th className="px-6 py-3 text-xs font-medium text-muted-foreground">Tag</th>
-                <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Color</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">Skills</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground">Actions</th>
+              <tr className="border-b border-border/40 text-left">
+                <th className="px-5 py-3 text-xs font-medium text-muted-foreground">Name</th>
+                <th className="px-5 py-3 text-xs font-medium text-muted-foreground">Color</th>
+                <th className="px-5 py-3 text-right text-xs font-medium text-muted-foreground">Skills</th>
+                <th className="px-5 py-3 text-right text-xs font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-border/40">
               {tags.map((tag) => (
-                <tr key={tag.id} className="group transition-colors hover:bg-muted/30">
+                <tr key={tag.id} className="group transition-colors hover:bg-accent/50">
                   {editingId === tag.id ? (
                     <>
-                      <td className="px-6 py-3.5">
+                      <td className="px-5 py-3">
                         <Input
                           value={editName}
                           onChange={(e) => setEditName(e.target.value)}
-                          className="h-8 w-44 text-sm"
-                          autoFocus
+                          className="h-8 w-40 text-xs"
                         />
                       </td>
-                      <td className="px-4 py-3.5">
+                      <td className="px-5 py-3">
                         <div className="flex items-center gap-1.5">
                           {PRESET_COLORS.map((c) => (
                             <button
                               key={c}
                               type="button"
-                              className={`h-5 w-5 rounded-full transition-all hover:scale-110 ${
-                                editColor === c ? "ring-2 ring-offset-1 ring-foreground/30 scale-110" : ""
+                              className={`h-4 w-4 rounded-full transition-all ${
+                                editColor === c
+                                  ? "scale-125 ring-2 ring-offset-1 ring-offset-background"
+                                  : "opacity-70 hover:opacity-100 hover:scale-110"
                               }`}
                               style={{ backgroundColor: c }}
                               onClick={() => setEditColor(c)}
@@ -198,23 +198,21 @@ export default function TagsPage() {
                           ))}
                         </div>
                       </td>
-                      <td className="px-4 py-3.5 text-right text-sm tabular-nums text-muted-foreground">
+                      <td className="px-5 py-3 text-right tabular-nums text-xs text-muted-foreground">
                         {tag.skillCount}
                       </td>
-                      <td className="px-6 py-3.5 text-right">
+                      <td className="px-5 py-3 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => handleUpdate(tag.id)}
-                            className="inline-flex items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
+                            className="rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                           >
-                            <CheckIcon className="h-3.5 w-3.5" />
                             Save
                           </button>
                           <button
                             onClick={() => setEditingId(null)}
-                            className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted"
+                            className="rounded-md border border-border/60 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
                           >
-                            <XIcon className="h-3.5 w-3.5" />
                             Cancel
                           </button>
                         </div>
@@ -222,37 +220,35 @@ export default function TagsPage() {
                     </>
                   ) : (
                     <>
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <span
-                          className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium text-white"
+                          className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium text-white"
                           style={{ backgroundColor: tag.color }}
                         >
                           {tag.name}
                         </span>
                       </td>
-                      <td className="px-4 py-4">
+                      <td className="px-5 py-3.5">
                         <div className="flex items-center gap-2">
-                          <div className="h-4 w-4 rounded-full shadow-sm" style={{ backgroundColor: tag.color }} />
+                          <div className="h-4 w-4 rounded-full border border-border/40 shadow-sm" style={{ backgroundColor: tag.color }} />
                           <span className="font-mono text-xs text-muted-foreground">{tag.color}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-4 text-right text-sm tabular-nums text-muted-foreground">
-                        {tag.skillCount}
+                      <td className="px-5 py-3.5 text-right tabular-nums text-xs text-muted-foreground">
+                        <span className="rounded-full bg-accent px-2 py-0.5 font-medium">{tag.skillCount}</span>
                       </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                      <td className="px-5 py-3.5 text-right">
+                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => startEdit(tag)}
-                            className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                            className="rounded-md border border-border/60 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                           >
-                            <PencilIcon className="h-3 w-3" />
                             Edit
                           </button>
                           <button
                             onClick={() => handleDelete(tag.id, tag.name)}
-                            className="inline-flex items-center gap-1 rounded-md border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-100"
+                            className="rounded-md border border-red-200 px-2.5 py-1 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 hover:text-red-700"
                           >
-                            <Trash2Icon className="h-3 w-3" />
                             Delete
                           </button>
                         </div>

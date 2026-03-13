@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ZapIcon, PlusIcon, SearchIcon, PencilIcon } from "lucide-react";
 
 interface Skill {
   id: string;
@@ -38,12 +37,12 @@ const typeLabels: Record<string, string> = {
   config: "Config",
 };
 
-const typeBadgeClass: Record<string, string> = {
-  prompt: "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
-  workflow: "bg-violet-50 text-violet-700 ring-1 ring-violet-200",
-  technique: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
-  snippet: "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
-  config: "bg-slate-100 text-slate-600 ring-1 ring-slate-200",
+const typeColors: Record<string, string> = {
+  prompt: "bg-blue-50 text-blue-700 ring-blue-100",
+  workflow: "bg-violet-50 text-violet-700 ring-violet-100",
+  technique: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+  snippet: "bg-orange-50 text-orange-700 ring-orange-100",
+  config: "bg-cyan-50 text-cyan-700 ring-cyan-100",
 };
 
 export default function SkillsListPage() {
@@ -80,38 +79,41 @@ export default function SkillsListPage() {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Skills</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {total} {total === 1 ? "skill" : "skills"} total
+          <h1 className="text-xl font-semibold text-foreground">Skills</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            {total} skill{total !== 1 ? "s" : ""} total
           </p>
         </div>
         <Link
           href="/dashboard/skills/new"
-          className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98]"
-          style={{ background: "linear-gradient(135deg, oklch(0.62 0.22 277), oklch(0.55 0.25 300))" }}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-primary/40"
         >
-          <PlusIcon className="h-4 w-4" />
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
           New Skill
         </Link>
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1 max-w-xs">
+          <svg className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
           <Input
             placeholder="Search skills..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="h-9 pl-9"
+            className="h-9 pl-9 text-sm bg-card"
           />
         </div>
         <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v ?? "all")}>
-          <SelectTrigger className="h-9 w-32">
+          <SelectTrigger className="h-9 w-32 text-sm bg-card">
             <SelectValue placeholder="All types" />
           </SelectTrigger>
           <SelectContent>
@@ -124,7 +126,7 @@ export default function SkillsListPage() {
           </SelectContent>
         </Select>
         <Select value={tagFilter} onValueChange={(v) => setTagFilter(v ?? "all")}>
-          <SelectTrigger className="h-9 w-32">
+          <SelectTrigger className="h-9 w-32 text-sm bg-card">
             <SelectValue placeholder="All tags" />
           </SelectTrigger>
           <SelectContent>
@@ -140,55 +142,52 @@ export default function SkillsListPage() {
 
       {/* Table */}
       {loading ? (
-        <div className="flex h-48 items-center justify-center rounded-xl border border-border bg-card">
+        <div className="flex h-40 items-center justify-center rounded-xl border border-border/60 bg-card">
           <div className="flex flex-col items-center gap-3">
             <div className="h-7 w-7 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
             <p className="text-sm text-muted-foreground">Loading skills...</p>
           </div>
         </div>
       ) : skills.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-card py-20 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-muted">
-            <ZapIcon className="h-7 w-7 text-muted-foreground" />
+        <div className="flex flex-col items-center gap-4 rounded-xl border border-border/60 bg-card py-16 text-center shadow-sm">
+          <div className="rounded-full bg-primary/10 p-4">
+            <svg className="h-7 w-7 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
           </div>
-          <p className="mt-4 text-base font-semibold">
-            {query || typeFilter !== "all" || tagFilter !== "all"
-              ? "No skills match your filters"
-              : "No skills yet"}
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {query || typeFilter !== "all" || tagFilter !== "all"
-              ? "Try adjusting your search or filters."
-              : "Create your first skill to get started."}
-          </p>
-          {!query && typeFilter === "all" && tagFilter === "all" && (
-            <Link
-              href="/dashboard/skills/new"
-              className="mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-all hover:opacity-90"
-              style={{ background: "linear-gradient(135deg, oklch(0.62 0.22 277), oklch(0.55 0.25 300))" }}
-            >
-              <PlusIcon className="h-4 w-4" />
-              New Skill
-            </Link>
-          )}
+          <div>
+            <p className="text-sm font-medium text-foreground">
+              {query || typeFilter !== "all" || tagFilter !== "all"
+                ? "No skills match your filters"
+                : "No skills yet"}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {query || typeFilter !== "all" || tagFilter !== "all" ? (
+                <button onClick={() => { setQuery(""); setTypeFilter("all"); setTagFilter("all"); }} className="text-primary hover:underline">
+                  Clear filters
+                </button>
+              ) : (
+                <Link href="/dashboard/skills/new" className="text-primary hover:underline">Create your first skill</Link>
+              )}
+            </p>
+          </div>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-          <table className="w-full">
+        <div className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
+          <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border bg-muted/30 text-left">
-                <th className="px-6 py-3 text-xs font-medium text-muted-foreground">Name</th>
-                <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Type</th>
-                <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Tags</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">Tokens</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">Updated</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground">Actions</th>
+              <tr className="border-b border-border/40 text-left">
+                <th className="px-5 py-3 text-xs font-medium text-muted-foreground">Name</th>
+                <th className="px-5 py-3 text-xs font-medium text-muted-foreground">Type</th>
+                <th className="px-5 py-3 text-xs font-medium text-muted-foreground">Tags</th>
+                <th className="px-5 py-3 text-right text-xs font-medium text-muted-foreground">Tokens</th>
+                <th className="px-5 py-3 text-right text-xs font-medium text-muted-foreground">Updated</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-border/40">
               {skills.map((skill) => (
-                <tr key={skill.id} className="group transition-colors hover:bg-muted/30">
-                  <td className="px-6 py-4">
+                <tr key={skill.id} className="group transition-colors hover:bg-accent/50">
+                  <td className="px-5 py-3.5">
                     <Link
                       href={`/dashboard/skills/${skill.id}`}
                       className="font-medium text-foreground hover:text-primary transition-colors"
@@ -199,17 +198,17 @@ export default function SkillsListPage() {
                       {skill.description}
                     </p>
                   </td>
-                  <td className="px-4 py-4">
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${typeBadgeClass[skill.type] || "bg-muted text-muted-foreground"}`}>
+                  <td className="px-5 py-3.5">
+                    <span className={`inline-flex rounded-md px-2 py-0.5 text-xs font-medium ring-1 ${typeColors[skill.type] || "bg-zinc-50 text-zinc-600 ring-zinc-100"}`}>
                       {typeLabels[skill.type] || skill.type}
                     </span>
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-5 py-3.5">
                     <div className="flex flex-wrap gap-1">
                       {skill.tags.map((tag) => (
                         <span
                           key={tag.id}
-                          className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+                          className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium"
                           style={{ backgroundColor: tag.color + "18", color: tag.color }}
                         >
                           {tag.name}
@@ -217,20 +216,11 @@ export default function SkillsListPage() {
                       ))}
                     </div>
                   </td>
-                  <td className="px-4 py-4 text-right text-xs tabular-nums text-muted-foreground">
+                  <td className="px-5 py-3.5 text-right tabular-nums text-xs text-muted-foreground">
                     {skill.tokenEstimate ? `~${skill.tokenEstimate}` : "—"}
                   </td>
-                  <td className="px-4 py-4 text-right text-xs text-muted-foreground">
+                  <td className="px-5 py-3.5 text-right text-xs text-muted-foreground">
                     {new Date(skill.updatedAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <Link
-                      href={`/dashboard/skills/${skill.id}`}
-                      className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-muted-foreground opacity-0 transition-all group-hover:opacity-100 hover:bg-muted hover:text-foreground"
-                    >
-                      <PencilIcon className="h-3 w-3" />
-                      Edit
-                    </Link>
                   </td>
                 </tr>
               ))}
