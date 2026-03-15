@@ -11,7 +11,8 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build
+RUN npm run build && \
+    npx esbuild src/db/migrate.ts --bundle --platform=node --external:better-sqlite3 --outfile=dist/migrate.js
 
 # --- Runner ---
 FROM base AS runner
@@ -27,12 +28,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Copy DB migration script and schema (needed at startup)
-COPY --from=builder /app/src/db/migrate.ts ./src/db/migrate.ts
-COPY --from=builder /app/tsconfig.json ./tsconfig.json
-
-# Install only tsx for running the migration script
-RUN npm install --no-save tsx
+# Copy pre-compiled migration script (no tsx/TypeScript runtime needed)
+COPY --from=builder /app/dist/migrate.js ./migrate.js
 
 # Create data directory for SQLite
 RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
@@ -43,4 +40,4 @@ ENV HOSTNAME="0.0.0.0"
 ENV DATABASE_PATH=/app/data/skills.db
 
 # PORT is read by Next.js standalone server automatically
-CMD ["sh", "-c", "npx tsx src/db/migrate.ts && node server.js"]
+CMD ["sh", "-c", "node migrate.js && node server.js"]
