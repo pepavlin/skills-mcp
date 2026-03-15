@@ -1,8 +1,9 @@
 services:
   app:
     build: .
-    ports:
-      - "${PORT:-3000}:${PORT:-3000}"
+    container_name: skills-mcp
+    expose:
+      - "3000"
     environment:
       - PORT=${PORT:-3000}
       - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
