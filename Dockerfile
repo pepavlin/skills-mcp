@@ -1,39 +1,23 @@
-FROM node:22-alpine AS base
+# This Dockerfile expects pre-built artifacts in .next/standalone.
+# Run ./build.sh (or `make build`) before `docker compose up --build`.
+#
+# The .next/standalone directory must contain:
+#   - server.js, node_modules/, .next/ (from `next build`)
+#   - .next/static/  (copied by build.sh)
+#   - public/        (copied by build.sh)
+#   - migrate.js     (bundled from src/db/migrate.ts by build.sh)
 
-# --- Dependencies ---
-FROM base AS deps
-WORKDIR /app
-COPY package.json package-lock.json ./
-# better-sqlite3 is a native addon that requires compilation via node-gyp
-RUN apk add --no-cache python3 make g++ && npm ci
-
-# --- Builder ---
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-RUN npm run build && \
-    npx esbuild src/db/migrate.ts --bundle --platform=node --external:better-sqlite3 --outfile=dist/migrate.js
-
-# --- Runner ---
-FROM base AS runner
+FROM node:22-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --gid nodejs nextjs && \
+    mkdir -p /app/data && chown nextjs:nodejs /app/data
 
-# Copy standalone output
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# Copy pre-compiled migration script (no tsx/TypeScript runtime needed)
-COPY --from=builder /app/dist/migrate.js ./migrate.js
-
-# Create data directory for SQLite
-RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
+# Copy all pre-staged artifacts in one layer (minimizes disk usage with VFS driver)
+COPY --chown=nextjs:nodejs .next/standalone ./
 
 USER nextjs
 
