@@ -1,11 +1,11 @@
 .PHONY: build deploy down logs
 
-## Build app locally and stage artifacts for Docker packaging.
+## Build app locally (for local dev / CI outside Docker).
 build:
 	./build.sh
 
-## Full deploy: build locally then start via docker compose.
-deploy: build
+## Deploy: build inside Docker and start containers.
+deploy:
 	docker compose up -d --build
 
 ## Stop and remove containers.
