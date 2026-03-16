@@ -48,17 +48,17 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-background">
       {/* Top bar */}
-      <header className="sticky top-0 z-50 border-b border-border/60 bg-white/80 backdrop-blur-md">
-        <div className="flex h-14 items-center justify-between px-5">
-          <div className="flex items-center gap-7">
+      <header className="sticky top-0 z-50 border-b border-border/50 bg-white/85 backdrop-blur-xl">
+        <div className="mx-auto flex h-[3.75rem] max-w-5xl items-center justify-between px-5">
+          <div className="flex items-center gap-6">
             <Link href="/dashboard" className="flex items-center gap-2.5 group">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-violet-600 text-[11px] font-bold text-white shadow-sm shadow-primary/30 transition-shadow group-hover:shadow-primary/50">
+              <div className="flex h-[1.875rem] w-[1.875rem] items-center justify-center rounded-[0.5rem] bg-gradient-to-br from-primary via-primary to-violet-600 text-[11px] font-bold text-white shadow-sm shadow-primary/25 transition-all duration-200 group-hover:shadow-md group-hover:shadow-primary/35 group-hover:scale-105">
                 S
               </div>
-              <span className="text-sm font-semibold tracking-tight text-foreground">AI Skills</span>
+              <span className="text-[0.9375rem] font-semibold tracking-tight text-foreground">AI Skills</span>
             </Link>
 
-            <nav className="flex items-center gap-0.5">
+            <nav className="flex items-center gap-1">
               {navItems.map((item) => {
                 const isActive = item.exact
                   ? pathname === item.href
@@ -67,15 +67,15 @@ export default function DashboardLayout({
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`relative rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-150 ${
+                    className={`relative rounded-[0.5rem] px-3 py-1.5 text-sm font-medium transition-all duration-150 ${
                       isActive
-                        ? "text-primary"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                        ? "bg-accent text-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent/60"
                     }`}
                   >
                     {item.label}
                     {isActive && (
-                      <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-primary" />
+                      <span className="absolute inset-x-3 -bottom-[0.6875rem] h-px rounded-full bg-primary/70" />
                     )}
                   </Link>
                 );
@@ -85,7 +85,7 @@ export default function DashboardLayout({
 
           <button
             onClick={handleLogout}
-            className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            className="rounded-[0.5rem] px-3 py-1.5 text-xs font-medium text-muted-foreground transition-all duration-150 hover:bg-accent/60 hover:text-foreground"
           >
             Sign out
           </button>
@@ -93,7 +93,7 @@ export default function DashboardLayout({
       </header>
 
       {/* Content */}
-      <main className="mx-auto max-w-5xl px-5 py-6">{children}</main>
+      <main className="mx-auto max-w-5xl px-5 py-7">{children}</main>
 
       <SuggestChangeButton />
     </div>

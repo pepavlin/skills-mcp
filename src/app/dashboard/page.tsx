@@ -89,11 +89,11 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-foreground">Overview</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">Manage your AI skills and MCP configuration</p>
+          <p className="mt-1 text-sm text-muted-foreground">Manage your AI skills and MCP configuration</p>
         </div>
         <Link
           href="/dashboard/skills/new"
-          className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-primary/40"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm shadow-primary/20 transition-all duration-150 hover:bg-primary/90 hover:shadow-md hover:shadow-primary/30"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -103,44 +103,40 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">Total Skills</p>
-              <p className="mt-1.5 text-3xl font-bold tabular-nums text-foreground">{stats.totalSkills}</p>
-            </div>
-            <div className="rounded-lg bg-primary/10 p-2">
-              <svg className="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
+        <div className="group rounded-2xl border border-border/50 bg-card p-5 shadow-sm shadow-black/[0.03] transition-shadow hover:shadow-md hover:shadow-black/[0.05]">
+          <p className="text-xs font-medium text-muted-foreground">Total Skills</p>
+          <p className="mt-2 text-[2rem] font-bold tabular-nums leading-none tracking-tight text-foreground">{stats.totalSkills}</p>
+          <div className="mt-3 flex items-center gap-1.5">
+            <div className="rounded-md bg-primary/10 p-1">
+              <svg className="h-3 w-3 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
               </svg>
             </div>
+            <span className="text-xs text-muted-foreground">skills stored</span>
           </div>
         </div>
 
-        <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">Total Tags</p>
-              <p className="mt-1.5 text-3xl font-bold tabular-nums text-foreground">{stats.totalTags}</p>
-            </div>
-            <div className="rounded-lg bg-violet-100 p-2">
-              <svg className="h-4 w-4 text-violet-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <div className="group rounded-2xl border border-border/50 bg-card p-5 shadow-sm shadow-black/[0.03] transition-shadow hover:shadow-md hover:shadow-black/[0.05]">
+          <p className="text-xs font-medium text-muted-foreground">Total Tags</p>
+          <p className="mt-2 text-[2rem] font-bold tabular-nums leading-none tracking-tight text-foreground">{stats.totalTags}</p>
+          <div className="mt-3 flex items-center gap-1.5">
+            <div className="rounded-md bg-violet-100 p-1">
+              <svg className="h-3 w-3 text-violet-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
                 <line x1="7" y1="7" x2="7.01" y2="7"/>
               </svg>
             </div>
+            <span className="text-xs text-muted-foreground">categories</span>
           </div>
         </div>
 
         {Object.entries(stats.byType).slice(0, 2).map(([type, count]) => (
-          <div key={type} className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">{typeLabels[type] || type}s</p>
-                <p className="mt-1.5 text-3xl font-bold tabular-nums text-foreground">{count}</p>
-              </div>
-              <span className={`rounded-md px-2 py-0.5 text-xs font-medium ring-1 ${typeColors[type] || "bg-zinc-50 text-zinc-600 ring-zinc-100"}`}>
+          <div key={type} className="group rounded-2xl border border-border/50 bg-card p-5 shadow-sm shadow-black/[0.03] transition-shadow hover:shadow-md hover:shadow-black/[0.05]">
+            <p className="text-xs font-medium text-muted-foreground">{typeLabels[type] || type}s</p>
+            <p className="mt-2 text-[2rem] font-bold tabular-nums leading-none tracking-tight text-foreground">{count}</p>
+            <div className="mt-3">
+              <span className={`inline-flex rounded-md px-2 py-0.5 text-[11px] font-medium ring-1 ${typeColors[type] || "bg-zinc-50 text-zinc-600 ring-zinc-100"}`}>
                 {typeLabels[type] || type}
               </span>
             </div>
@@ -161,7 +157,7 @@ export default function DashboardPage() {
       )}
 
       {/* Recent skills */}
-      <div className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm shadow-black/[0.03]">
         <div className="flex items-center justify-between border-b border-border/60 px-5 py-3.5">
           <h2 className="text-sm font-semibold text-foreground">Recent Skills</h2>
           <Link href="/dashboard/skills" className="text-xs font-medium text-primary hover:text-primary/80 transition-colors">
@@ -239,7 +235,7 @@ export default function DashboardPage() {
       </div>
 
       {/* MCP config */}
-      <div className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm shadow-black/[0.03]">
         <div className="flex items-center justify-between border-b border-border/60 px-5 py-3.5">
           <div className="flex items-center gap-2">
             <div className="rounded-md bg-emerald-100 p-1">
