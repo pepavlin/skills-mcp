@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { SaveIcon, XIcon } from "lucide-react";
+import { SaveIcon, XIcon, SparklesIcon } from "lucide-react";
+import { AIAssistantPanel } from "@/components/ai-assistant-panel";
+import type { SkillFieldUpdates } from "@/app/api/ai/chat/route";
 
 interface Tag {
   id: string;
@@ -36,6 +38,9 @@ interface SkillFormProps {
   mode: "create" | "edit";
 }
 
+// Fields that can be highlighted when updated by AI
+type HighlightableField = "name" | "description" | "content" | "type" | "tags";
+
 export function SkillForm({ initialData, mode }: SkillFormProps) {
   const router = useRouter();
   const [name, setName] = useState(initialData?.name || "");
@@ -47,6 +52,8 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
   );
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [saving, setSaving] = useState(false);
+  const [showAI, setShowAI] = useState(false);
+  const [highlightedFields, setHighlightedFields] = useState<Set<HighlightableField>>(new Set());
 
   const tokenEstimate = Math.ceil((content.length + description.length) / 4);
 
@@ -61,6 +68,59 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
       prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
     );
   }
+
+  /** Temporarily highlight a field to indicate it was updated by AI */
+  function flashField(field: HighlightableField) {
+    setHighlightedFields((prev) => new Set([...prev, field]));
+    setTimeout(() => {
+      setHighlightedFields((prev) => {
+        const next = new Set(prev);
+        next.delete(field);
+        return next;
+      });
+    }, 2000);
+  }
+
+  /** Called by AIAssistantPanel when the AI suggests field updates */
+  const handleAIFieldsUpdate = useCallback(
+    (updates: SkillFieldUpdates) => {
+      if (updates.name !== undefined) {
+        setName(updates.name);
+        flashField("name");
+      }
+      if (updates.description !== undefined) {
+        setDescription(updates.description);
+        flashField("description");
+      }
+      if (updates.content !== undefined) {
+        setContent(updates.content);
+        flashField("content");
+      }
+      if (updates.type !== undefined) {
+        setType(updates.type);
+        flashField("type");
+      }
+      if (updates.suggestedTags !== undefined && updates.suggestedTags.length > 0) {
+        // Map suggested tag names to existing tag IDs
+        const matchedIds = updates.suggestedTags
+          .map((tagName) =>
+            availableTags.find(
+              (t) => t.name.toLowerCase() === tagName.toLowerCase()
+            )?.id
+          )
+          .filter((id): id is string => id !== undefined);
+
+        if (matchedIds.length > 0) {
+          setSelectedTagIds((prev) => {
+            const combined = [...new Set([...prev, ...matchedIds])];
+            return combined;
+          });
+          flashField("tags");
+        }
+      }
+    },
+    [availableTags]
+  );
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -125,15 +185,42 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
       ? "text-amber-600"
       : "text-muted-foreground";
 
+  function highlightClass(field: HighlightableField) {
+    return highlightedFields.has(field)
+      ? "ring-2 ring-violet-400 ring-offset-1 transition-all duration-300"
+      : "transition-all duration-300";
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-0">
-      <div className="grid gap-6 lg:grid-cols-3">
+      {/* AI toggle bar */}
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">
+          {mode === "create" ? "New skill" : "Edit skill"}
+        </p>
+        <Button
+          type="button"
+          variant={showAI ? "default" : "outline"}
+          size="sm"
+          className={`gap-1.5 text-xs ${
+            showAI
+              ? "bg-violet-600 hover:bg-violet-700 text-white border-violet-600"
+              : "border-violet-300 text-violet-700 hover:bg-violet-50 dark:border-violet-700 dark:text-violet-400 dark:hover:bg-violet-950"
+          }`}
+          onClick={() => setShowAI((v) => !v)}
+        >
+          <SparklesIcon className="h-3.5 w-3.5" />
+          {showAI ? "Hide AI Assistant" : "Fill with AI"}
+        </Button>
+      </div>
+
+      <div className={`grid gap-6 ${showAI ? "lg:grid-cols-5" : "lg:grid-cols-3"}`}>
         {/* Main fields */}
-        <div className="space-y-6 lg:col-span-2">
+        <div className={`space-y-6 ${showAI ? "lg:col-span-2" : "lg:col-span-2"}`}>
           <div className="rounded-xl border border-border bg-card shadow-sm p-6">
             <h2 className="text-sm font-semibold mb-4">Skill details</h2>
             <div className="space-y-4">
-              <div className="space-y-1.5">
+              <div className={`space-y-1.5 rounded-lg ${highlightClass("name")}`}>
                 <Label htmlFor="name" className="text-sm font-medium">Name</Label>
                 <Input
                   id="name"
@@ -144,7 +231,7 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
                 />
               </div>
 
-              <div className="space-y-1.5">
+              <div className={`space-y-1.5 rounded-lg ${highlightClass("description")}`}>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="description" className="text-sm font-medium">Description</Label>
                   <span className={`text-xs tabular-nums ${description.length < 20 && description.length > 0 ? "text-red-500" : "text-muted-foreground"}`}>
@@ -165,7 +252,7 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
                 )}
               </div>
 
-              <div className="space-y-1.5">
+              <div className={`space-y-1.5 rounded-lg ${highlightClass("content")}`}>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="content" className="text-sm font-medium">Content</Label>
                   <span className={`text-xs tabular-nums ${tokenTextColor}`}>
@@ -187,7 +274,7 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
 
         {/* Sidebar */}
         <div className="space-y-4">
-          <div className="rounded-xl border border-border bg-card shadow-sm p-5">
+          <div className={`rounded-xl border border-border bg-card shadow-sm p-5 ${highlightClass("type")}`}>
             <Label className="text-sm font-medium">Type</Label>
             <Select value={type} onValueChange={(v) => setType(v ?? "prompt")}>
               <SelectTrigger className="mt-2 h-10">
@@ -203,7 +290,7 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
             </Select>
           </div>
 
-          <div className="rounded-xl border border-border bg-card shadow-sm p-5">
+          <div className={`rounded-xl border border-border bg-card shadow-sm p-5 ${highlightClass("tags")}`}>
             <Label className="text-sm font-medium">Tags</Label>
             {availableTags.length === 0 ? (
               <p className="mt-2 text-xs text-muted-foreground">No tags yet.</p>
@@ -270,6 +357,18 @@ export function SkillForm({ initialData, mode }: SkillFormProps) {
             </Button>
           </div>
         </div>
+
+        {/* AI Assistant Panel */}
+        {showAI && (
+          <div className="lg:col-span-2 h-[600px]">
+            <AIAssistantPanel
+              onClose={() => setShowAI(false)}
+              currentValues={{ name, description, content, type }}
+              onFieldsUpdate={handleAIFieldsUpdate}
+              availableTags={availableTags}
+            />
+          </div>
+        )}
       </div>
     </form>
   );

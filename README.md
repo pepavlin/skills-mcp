@@ -5,6 +5,7 @@ Personal AI skills knowledge base with MCP (Model Context Protocol) integration.
 ## Features
 
 - **Web Dashboard** — Admin UI for creating, editing, searching, and organizing AI skills
+- **AI-Assisted Editing** — Chat with an AI assistant to describe a skill and have it fill in the form automatically (requires OpenAI API key)
 - **MCP Server** — Exposes skills as MCP tools so AI assistants (Claude Code, Cursor, etc.) can search and retrieve skills
 - **Skill Types** — Prompts, workflows, techniques, snippets, configs
 - **Tagging System** — Organize skills with colored tags
@@ -30,7 +31,8 @@ npm install
 
 ```bash
 cp .env.example .env.local
-# Edit .env.local to set ADMIN_USERNAME and ADMIN_PASSWORD
+# Edit .env.local to set ADMIN_USERNAME, ADMIN_PASSWORD
+# Optional: add OPENAI_API_KEY to enable AI-assisted skill creation
 ```
 
 ### 3. Initialize the database
@@ -106,10 +108,17 @@ For local development, run the MCP server as a subprocess:
 ```
 src/
 ├── app/                 # Next.js pages & API routes
-│   ├── api/             # REST API (skills, tags, auth)
+│   ├── api/
+│   │   ├── ai/chat/     # AI assistant endpoint (OpenAI)
+│   │   ├── skills/      # Skills CRUD
+│   │   ├── tags/        # Tags CRUD
+│   │   └── auth/        # Session management
 │   ├── dashboard/       # Admin dashboard pages
 │   └── login/           # Login page
-├── components/          # React components (skill-form, ui/)
+├── components/          # React components
+│   ├── skill-form.tsx   # Skill create/edit form with AI toggle
+│   ├── ai-assistant-panel.tsx  # AI chat panel
+│   └── ui/              # shadcn/ui primitives
 ├── db/                  # Database schema & migrations
 ├── lib/                 # Business logic (skills, tags, auth)
 ├── mcp/                 # MCP server (stdio transport)
