@@ -29,7 +29,13 @@ export const skillTags = sqliteTable("skill_tags", {
     .references(() => tags.id, { onDelete: "cascade" }),
 });
 
+export const sessions = sqliteTable("sessions", {
+  token: text("token").primaryKey(),
+  expiresAt: integer("expires_at").notNull(),
+});
+
 export type Skill = typeof skills.$inferSelect;
 export type NewSkill = typeof skills.$inferInsert;
 export type Tag = typeof tags.$inferSelect;
 export type NewTag = typeof tags.$inferInsert;
+export type Session = typeof sessions.$inferSelect;

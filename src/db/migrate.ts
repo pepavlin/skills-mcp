@@ -43,6 +43,11 @@ sqlite.exec(`
   CREATE INDEX IF NOT EXISTS idx_skills_type ON skills(type);
   CREATE INDEX IF NOT EXISTS idx_skill_tags_skill ON skill_tags(skill_id);
   CREATE INDEX IF NOT EXISTS idx_skill_tags_tag ON skill_tags(tag_id);
+
+  CREATE TABLE IF NOT EXISTS sessions (
+    token TEXT PRIMARY KEY,
+    expires_at INTEGER NOT NULL
+  );
 `);
 
 console.log("Database migrated successfully at:", DB_PATH);
