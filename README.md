@@ -51,12 +51,21 @@ Open [http://localhost:3000](http://localhost:3000) and log in with your admin c
 
 ## Docker
 
+The Docker image is built from pre-compiled local artifacts to keep image layers small.
+Run the build script first, then start with docker compose:
+
 ```bash
-# Default port 3000
-docker compose up -d
+# Build app locally and stage artifacts
+./build.sh
+
+# Start container (default port 3000)
+docker compose up -d --build
+
+# Or use make
+make deploy
 
 # Custom port
-PORT=8080 docker compose up -d
+PORT=8080 docker compose up -d --build
 ```
 
 The database is persisted in a Docker volume (`skills-data`). Configure credentials via environment variables or `.env` file.
