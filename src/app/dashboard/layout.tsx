@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { SuggestChangeButton } from "@/components/suggest-change-button";
 
 const navItems = [
   { href: "/dashboard", label: "Overview", exact: true },
@@ -95,7 +94,6 @@ export default function DashboardLayout({
       {/* Content */}
       <main className="mx-auto max-w-5xl px-5 py-7">{children}</main>
 
-      <SuggestChangeButton />
     </div>
   );
 }
