@@ -38,6 +38,7 @@ const typeColors: Record<string, string> = {
 export default function DashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [copied, setCopied] = useState(false);
+  const [configFormat, setConfigFormat] = useState<"json" | "yaml">("json");
 
   useEffect(() => {
     fetch("/api/stats")
@@ -45,7 +46,7 @@ export default function DashboardPage() {
       .then(setStats);
   }, []);
 
-  const mcpConfig = JSON.stringify(
+  const mcpConfigJson = JSON.stringify(
     {
       mcpServers: {
         "ai-skills": {
@@ -58,8 +59,15 @@ export default function DashboardPage() {
     2
   );
 
+  const mcpConfigYaml = `mcpServers:
+  ai-skills:
+    type: http
+    url: https://ai-skills.pavlin.dev/api/mcp`;
+
+  const activeConfig = configFormat === "json" ? mcpConfigJson : mcpConfigYaml;
+
   function copyConfig() {
-    navigator.clipboard.writeText(mcpConfig);
+    navigator.clipboard.writeText(activeConfig);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -241,41 +249,76 @@ export default function DashboardPage() {
             </div>
             <h2 className="text-sm font-semibold text-foreground">MCP Configuration</h2>
           </div>
-          <button
-            onClick={copyConfig}
-            className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
-              copied
-                ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
-                : "bg-accent text-muted-foreground hover:text-foreground ring-1 ring-border/60"
-            }`}
-          >
-            {copied ? (
-              <>
-                <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-                Copied!
-              </>
-            ) : (
-              <>
-                <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-                </svg>
-                Copy
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Format tabs */}
+            <div className="flex rounded-md ring-1 ring-border/60 overflow-hidden">
+              <button
+                onClick={() => { setConfigFormat("json"); setCopied(false); }}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                  configFormat === "json"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-accent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                JSON
+              </button>
+              <button
+                onClick={() => { setConfigFormat("yaml"); setCopied(false); }}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors border-l border-border/60 ${
+                  configFormat === "yaml"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-accent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                YAML
+              </button>
+            </div>
+            <button
+              onClick={copyConfig}
+              className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
+                copied
+                  ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
+                  : "bg-accent text-muted-foreground hover:text-foreground ring-1 ring-border/60"
+              }`}
+            >
+              {copied ? (
+                <>
+                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </>
+              )}
+            </button>
+          </div>
         </div>
         <div className="grid gap-5 p-5 lg:grid-cols-2">
           <div>
-            <p className="mb-2.5 text-xs text-muted-foreground">
-              Add to{" "}
-              <code className="rounded bg-accent px-1.5 py-0.5 font-mono text-[11px] text-foreground">~/.claude.json</code>
-              {" "}or{" "}
-              <code className="rounded bg-accent px-1.5 py-0.5 font-mono text-[11px] text-foreground">.mcp.json</code>
-            </p>
+            {configFormat === "json" ? (
+              <p className="mb-2.5 text-xs text-muted-foreground">
+                Add to{" "}
+                <code className="rounded bg-accent px-1.5 py-0.5 font-mono text-[11px] text-foreground">~/.claude.json</code>
+                {" "}or{" "}
+                <code className="rounded bg-accent px-1.5 py-0.5 font-mono text-[11px] text-foreground">.mcp.json</code>
+              </p>
+            ) : (
+              <p className="mb-2.5 text-xs text-muted-foreground">
+                Add to{" "}
+                <code className="rounded bg-accent px-1.5 py-0.5 font-mono text-[11px] text-foreground">mcp.yaml</code>
+                {" "}or{" "}
+                <code className="rounded bg-accent px-1.5 py-0.5 font-mono text-[11px] text-foreground">.cursor/mcp.yaml</code>
+                {" "}(Cursor, Windsurf, etc.)
+              </p>
+            )}
             <pre className="overflow-x-auto rounded-lg bg-zinc-950 p-4 font-mono text-xs leading-relaxed text-zinc-300 shadow-inner">
-              {mcpConfig}
+              {activeConfig}
             </pre>
           </div>
           <div>
