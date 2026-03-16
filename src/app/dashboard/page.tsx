@@ -39,8 +39,10 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [copied, setCopied] = useState(false);
   const [configFormat, setConfigFormat] = useState<"json" | "yaml">("json");
+  const [mcpUrl, setMcpUrl] = useState("/api/mcp");
 
   useEffect(() => {
+    setMcpUrl(`${window.location.origin}/api/mcp`);
     fetch("/api/stats")
       .then((r) => r.json())
       .then(setStats);
@@ -51,7 +53,7 @@ export default function DashboardPage() {
       mcpServers: {
         "ai-skills": {
           type: "http",
-          url: "https://ai-skills.pavlin.dev/api/mcp",
+          url: mcpUrl,
         },
       },
     },
@@ -62,7 +64,7 @@ export default function DashboardPage() {
   const mcpConfigYaml = `mcpServers:
   ai-skills:
     type: http
-    url: https://ai-skills.pavlin.dev/api/mcp`;
+    url: ${mcpUrl}`;
 
   const activeConfig = configFormat === "json" ? mcpConfigJson : mcpConfigYaml;
 
