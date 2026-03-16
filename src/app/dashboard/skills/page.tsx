@@ -90,7 +90,7 @@ export default function SkillsListPage() {
         </div>
         <Link
           href="/dashboard/skills/new"
-          className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-primary/40"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm shadow-primary/20 transition-all duration-150 hover:bg-primary/90 hover:shadow-md hover:shadow-primary/30"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -142,14 +142,14 @@ export default function SkillsListPage() {
 
       {/* Table */}
       {loading ? (
-        <div className="flex h-40 items-center justify-center rounded-xl border border-border/60 bg-card">
+        <div className="flex h-40 items-center justify-center rounded-2xl border border-border/50 bg-card">
           <div className="flex flex-col items-center gap-3">
             <div className="h-7 w-7 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
             <p className="text-sm text-muted-foreground">Loading skills...</p>
           </div>
         </div>
       ) : skills.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-xl border border-border/60 bg-card py-16 text-center shadow-sm">
+        <div className="flex flex-col items-center gap-4 rounded-2xl border border-border/50 bg-card py-16 text-center shadow-sm shadow-black/[0.03]">
           <div className="rounded-full bg-primary/10 p-4">
             <svg className="h-7 w-7 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -173,7 +173,7 @@ export default function SkillsListPage() {
           </div>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm shadow-black/[0.03]">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border/40 text-left">
