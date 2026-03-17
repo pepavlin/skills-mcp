@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import {
@@ -53,6 +53,9 @@ export default function SkillsListPage() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [tagFilter, setTagFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
+  const [importMode, setImportMode] = useState<"skip" | "overwrite">("skip");
+  const [importStatus, setImportStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   const fetchSkills = useCallback(async () => {
     setLoading(true);
@@ -78,6 +81,44 @@ export default function SkillsListPage() {
       .then(setTags);
   }, []);
 
+  const handleExport = () => {
+    window.location.href = "/api/export";
+  };
+
+  const handleImportClick = () => {
+    setImportStatus(null);
+    importInputRef.current?.click();
+  };
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch(`/api/import?mode=${importMode}`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setImportStatus({ type: "error", message: data.error || "Import failed" });
+      } else {
+        const msg = `Imported ${data.imported} skill${data.imported !== 1 ? "s" : ""}, ${data.tagsImported} tag${data.tagsImported !== 1 ? "s" : ""}${data.skipped > 0 ? `, skipped ${data.skipped}` : ""}.`;
+        setImportStatus({ type: "success", message: msg });
+        fetchSkills();
+      }
+    } catch {
+      setImportStatus({ type: "error", message: "Network error during import" });
+    }
+
+    // Reset input so same file can be imported again
+    e.target.value = "";
+  };
+
   return (
     <div className="space-y-5">
       {/* Page header */}
@@ -88,16 +129,72 @@ export default function SkillsListPage() {
             {total} skill{total !== 1 ? "s" : ""} total
           </p>
         </div>
-        <Link
-          href="/dashboard/skills/new"
-          className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm shadow-primary/20 transition-all duration-150 hover:bg-primary/90 hover:shadow-md hover:shadow-primary/30"
-        >
-          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          New Skill
-        </Link>
+        <div className="flex items-center gap-2">
+          {/* Import mode selector */}
+          <Select value={importMode} onValueChange={(v) => setImportMode(v as "skip" | "overwrite")}>
+            <SelectTrigger className="h-9 w-28 text-sm bg-card">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="skip">Skip dupes</SelectItem>
+              <SelectItem value="overwrite">Overwrite</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Hidden file input */}
+          <input
+            ref={importInputRef}
+            type="file"
+            accept=".json,application/json"
+            className="hidden"
+            onChange={handleImportFile}
+          />
+
+          {/* Import button */}
+          <button
+            onClick={handleImportClick}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-border/60 bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-all duration-150 hover:bg-accent"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Import
+          </button>
+
+          {/* Export button */}
+          <button
+            onClick={handleExport}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-border/60 bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-all duration-150 hover:bg-accent"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export
+          </button>
+
+          <Link
+            href="/dashboard/skills/new"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm shadow-primary/20 transition-all duration-150 hover:bg-primary/90 hover:shadow-md hover:shadow-primary/30"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            New Skill
+          </Link>
+        </div>
       </div>
+
+      {/* Import status message */}
+      {importStatus && (
+        <div className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm ${importStatus.type === "success" ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-red-200 bg-red-50 text-red-700"}`}>
+          <span>{importStatus.message}</span>
+          <button onClick={() => setImportStatus(null)} className="ml-4 opacity-60 hover:opacity-100">
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex items-center gap-2">
