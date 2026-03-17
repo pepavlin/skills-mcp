@@ -5,6 +5,11 @@
 FROM node:22-slim AS deps
 WORKDIR /app
 
+# Install build tools required for native modules (e.g. better-sqlite3)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 make g++ \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY package.json package-lock.json ./
 RUN npm ci
 

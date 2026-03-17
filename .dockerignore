@@ -6,3 +6,6 @@ tmp
 .git
 .env*
 !.env.example
+# Exclude incremental TS build cache and auto-generated env types — Next.js regenerates these
+tsconfig.tsbuildinfo
+next-env.d.ts
